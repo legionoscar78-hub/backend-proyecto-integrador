@@ -1,0 +1,17 @@
+FUNCIONES Y METODOS: ETL
+
+Conjunto de archivos para dar entrada, formato y salida a los datos para un entrenamiento de calidad
+
+- extract.py: lee de csv externos
+- transform.py: limpieza y normalización de los datos ingresados
+- load.py: escribe parquet/CSV procesado
+- run_etl.py: punto de entrada al etl
+
+1. Decidir diagnósticos y datasets
+2. Estructura + entorno + config.yaml
+3. Descargar a raw/ + README de fuentes
+4. EDA (notebook)
+5. Catálogos y mapeos (sintomas.csv, cie10_subset.csv, label_map.yaml)
+6. features.py + tests
+7. extract → transform → load → run_etl
+8. Validar salida

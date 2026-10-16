@@ -1,0 +1,7 @@
+FUNCIONES Y METODOS: CORE
+
+La carpeta core, es la capa transversal del proyecto
+
+- config.py: variables de entorno (BD)
+- database.py: motor y sesión de postresql
+- security.py: login y hash de contraseña

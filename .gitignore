@@ -1,0 +1,40 @@
+# --- Secretos: nunca se suben (usar .env.example como plantilla) ---
+.env
+.env.*
+!.env.example
+
+# --- Entornos virtuales ---
+.venv/
+venv/
+env/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Datos (pesados y/o sensibles) ---
+# raw/: se versiona solo su README (fuente, licencia, checksums)
+ml_pipeline/data/raw/*
+!ml_pipeline/data/raw/README.md
+# processed/: se regenera con el ETL
+ml_pipeline/data/processed/*
+
+# --- Modelos entrenados (se regeneran con train.py) ---
+# symptoms.json y metadata.json SÍ se versionan
+app/ml/artifacts/*.joblib
+app/ml/artifacts/*.pt
+app/ml/artifacts/*.pth
+app/ml/artifacts/*.onnx
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Editor / sistema operativo ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

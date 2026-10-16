@@ -1,0 +1,7 @@
+FUNCIONES Y METODOS: TRAINING
+
+Métodos de entrenamiendo para el modelo de IA seleccionado
+
+- train.py: script de entranamiento de mlp
+- evaluate.py: evaluación de respuestas de mlp
+- config.yaml: hiperparametros, rutas, semilla

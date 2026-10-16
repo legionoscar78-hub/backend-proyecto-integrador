@@ -1,0 +1,14 @@
+FUNCIONES Y METODOS: API
+
+La carpeta api es la capa presentación de nuestro proyecto en el caso del backend, esta expone los datos a la web
+
+- deps.py: dependencias, sesión y usuario actual
+- routers/
+	- auth.py: inicio de sesión
+	- pacientes.py: operaciones crud pacientes
+	- consultas.py: operaciones relacionadas con capturar consultas
+	- historial.py: historial de consultas realizadas
+	- dashboard.py: retorno de datos específicos consultados
+
+
+

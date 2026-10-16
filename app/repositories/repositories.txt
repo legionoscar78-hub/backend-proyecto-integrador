@@ -1,0 +1,3 @@
+FUNCIONES Y METODOS: SERVICES
+
+La carpeta repositories es nuestra capa de acceso de datos, cada carpeta representa las operaciones de cada entidad

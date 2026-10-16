@@ -1,0 +1,9 @@
+FastAPI
+Uvicorn
+SQLAlchemy
+Psycopg
+Alembic
+Pydantic-settings
+Argon2-cffi
+Pyjwt
+PyTorch

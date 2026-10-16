@@ -1,0 +1,10 @@
+FUNCIONES Y METODOS: ML
+
+Capa extra para el manejo del modelo de IA 
+
+- predictor.py: carga artifacts y predice
+- features.py: normalización y vectorización compartida
+- artifact/: carpeta del modelo entrenado y lista de síntomas, lo que produce el entrenamiento
+	- model.joblib
+	- symptoms.json: vocabulario ordenado de síntomas
+	- metadata.json: versión, fecha, métricas, clases

@@ -1,0 +1,5 @@
+FUNCIONES Y METODOS: SCHEMAS
+
+Contratos de entrada y salida
+
+- prediccion.py: lista de 3-5 enfermedades con porcentaje de probabilidad

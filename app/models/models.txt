@@ -1,0 +1,3 @@
+FUNCIONES Y METODOS: MODELS
+
+La carpeta models es nuestra capa de entidades de la base de datos. Cada archivo representa los campos de su respectiva tabla en la base de datos
