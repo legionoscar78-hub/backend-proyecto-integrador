@@ -51,8 +51,11 @@ class Resultado:
     metricas_val: dict
 
 
-def cargar_datos(processed: Path, artifacts: Path) -> Datos:
-    """Lee la salida del ETL y comprueba que sea coherente antes de entrenar."""
+def leer_dataset(processed: Path, artifacts: Path) -> tuple[pd.DataFrame, list[str], list[dict]]:
+    """Lee la salida del ETL y comprueba que sea coherente. Devuelve (df, vocabulario, clases).
+
+    Lo usan este script y evaluate.py, para que los dos validen los datos igual.
+    """
     vocabulario = cargar_vocabulario(artifacts / "symptoms.json")
     clases = json.loads((processed / "classes.json").read_text(encoding="utf-8"))
     df = pd.read_parquet(processed / "dataset.parquet")
@@ -69,17 +72,24 @@ def cargar_datos(processed: Path, artifacts: Path) -> Datos:
     real = dict(df[["clase", "enfermedad_en"]].drop_duplicates().itertuples(index=False))
     if real != esperado:
         raise ErrorDeEntrenamiento("Las clases de dataset.parquet no coinciden con classes.json")
+    return df, vocabulario, clases
 
-    def tomar(split: str) -> tuple[np.ndarray, np.ndarray]:
-        parte = df[df["split"] == split]
-        if parte.empty:
-            raise ErrorDeEntrenamiento(f"El dataset no tiene filas en el split '{split}'")
-        # copy=True: pandas puede devolver vistas de solo lectura y torch.from_numpy las rechaza
-        return (parte[vocabulario].to_numpy(dtype=np.float32, copy=True),
-                parte["clase"].to_numpy(dtype=np.int64, copy=True))
 
-    X_train, y_train = tomar("train")
-    X_val, y_val = tomar("val")
+def tomar_split(df: pd.DataFrame, vocabulario: list[str], split: str) -> tuple[np.ndarray, np.ndarray]:
+    """(X float32, y int64) de las filas del split indicado."""
+    parte = df[df["split"] == split]
+    if parte.empty:
+        raise ErrorDeEntrenamiento(f"El dataset no tiene filas en el split '{split}'")
+    # copy=True: pandas puede devolver vistas de solo lectura y torch.from_numpy las rechaza
+    return (parte[vocabulario].to_numpy(dtype=np.float32, copy=True),
+            parte["clase"].to_numpy(dtype=np.int64, copy=True))
+
+
+def cargar_datos(processed: Path, artifacts: Path) -> Datos:
+    """Datos para entrenar: solo train y val. El split test no sale de esta función."""
+    df, vocabulario, clases = leer_dataset(processed, artifacts)
+    X_train, y_train = tomar_split(df, vocabulario, "train")
+    X_val, y_val = tomar_split(df, vocabulario, "val")
     return Datos(X_train, y_train, X_val, y_val, vocabulario, clases)
 
 

@@ -9,8 +9,13 @@ Entrenamiento y evaluacion del MLP. Se ejecuta desde backend/ despues del ETL.
 	- entrenar(): Adam + CrossEntropyLoss. Cada epoca mide val; guarda los pesos de la epoca con menor
 	  perdida en val y se detiene tras `patience` epocas sin mejora. Misma semilla, mismo resultado
 	- guardar(): escribe app/ml/artifacts/model.pt (solo pesos, state_dict) y metadata.json
-- evaluate.py: evaluacion final sobre el split test (pendiente). Se corre una sola vez, al terminar de
-  ajustar hiperparametros, para que la cifra no este sesgada por haber elegido el modelo mirando test
+- evaluate.py: python -m ml_pipeline.training.evaluate
+	- evaluacion final sobre el split test: top-1/3/5, macro-F1, recall por enfermedad, confusiones
+	  mas frecuentes, calibracion (ECE) y casos ambiguos (mismo vector de sintomas visto en train con
+	  otra enfermedad: ningun modelo los acierta todos)
+	- escribe data/processed/evaluacion_test.json (completo) y un resumen en metadata.json (metricas_test)
+	- se corre una sola vez por modelo: si metadata.json ya tiene metricas_test se niega, salvo --forzar.
+	  Si se ajustan hiperparametros mirando test, la cifra deja de ser una estimacion honesta
 
 La arquitectura vive en app/ml/model.py (crear_mlp) porque la usan el entrenamiento y el predictor.
 metadata.json guarda lo necesario para reconstruirla: n_entrada, n_clases, hidden_layers, dropout,
@@ -23,3 +28,6 @@ calibradas (sesgadas hacia las clases raras). 'none' deja las probabilidades mas
 frecuencia real del dataset.
 
 Pruebas: python -m pytest tests/training tests/ml/test_model.py
+
+cargar_modelo() (app/ml/model.py) reconstruye el modelo desde los artefactos y comprueba el hash de
+symptoms.json; lo usan evaluate.py y, mas adelante, predictor.py.
