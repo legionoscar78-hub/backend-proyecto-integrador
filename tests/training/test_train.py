@@ -86,3 +86,23 @@ def test_guardar_escribe_modelo_y_metadata_coherentes(tmp_path):
     with torch.no_grad():
         pred = modelo(torch.from_numpy(datos.X_val)).argmax(dim=1).numpy()
     assert (pred == datos.y_val).mean() == pytest.approx(meta["metricas_val"]["top1"])
+
+
+def test_reentrenar_con_los_mismos_pesos_conserva_metricas_test(tmp_path):
+    processed, artifacts = preparar_carpetas(tmp_path)
+    datos = cargar_datos(processed, artifacts)
+    res = entrenar(datos.X_train, datos.y_train, datos.X_val, datos.y_val, 3, HP, seed=42)
+    destino = guardar(res, datos, HP, 42, artifacts)
+
+    meta = json.loads(destino["metadata"].read_text(encoding="utf-8"))
+    meta["metricas_test"] = {"top1": 0.9}
+    destino["metadata"].write_text(json.dumps(meta), encoding="utf-8")
+
+    # mismos pesos: la evaluación sigue valiendo
+    guardar(res, datos, HP, 42, artifacts)
+    assert json.loads(destino["metadata"].read_text(encoding="utf-8"))["metricas_test"] == {"top1": 0.9}
+
+    # pesos distintos: modelo nuevo, sin evaluar
+    otro = entrenar(datos.X_train, datos.y_train, datos.X_val, datos.y_val, 3, {**HP, "hidden_layers": [8]}, seed=1)
+    guardar(otro, datos, {**HP, "hidden_layers": [8]}, 1, artifacts)
+    assert "metricas_test" not in json.loads(destino["metadata"].read_text(encoding="utf-8"))

@@ -207,8 +207,22 @@ def _huella(estado: dict[str, torch.Tensor]) -> str:
     return h.hexdigest()
 
 
+def _leer_json(ruta: Path) -> dict:
+    """Contenido de un JSON, o {} si el archivo no existe, está vacío o no es válido."""
+    try:
+        contenido = json.loads(ruta.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return contenido if isinstance(contenido, dict) else {}
+
+
 def guardar(res: Resultado, datos: Datos, hp: dict, seed: int, artifacts: Path) -> dict[str, Path]:
-    """Escribe model.pt (solo pesos) y metadata.json en artifacts/."""
+    """Escribe model.pt (solo pesos) y metadata.json en artifacts/.
+
+    Si ya había un metadata.json de la misma versión (mismos pesos, p. ej. al repetir el
+    entrenamiento con la misma semilla), conserva su metricas_test: el modelo es idéntico,
+    así que esa evaluación sigue siendo válida. Con pesos distintos se descarta.
+    """
     artifacts.mkdir(parents=True, exist_ok=True)
     destino = {"modelo": artifacts / "model.pt", "metadata": artifacts / "metadata.json"}
     torch.save(res.estado, destino["modelo"])
@@ -243,6 +257,9 @@ def guardar(res: Resultado, datos: Datos, hp: dict, seed: int, artifacts: Path) 
         "metricas_val": res.metricas_val,
         "clases": datos.clases,
     }
+    previo = _leer_json(destino["metadata"])
+    if previo.get("version") == metadata["version"] and "metricas_test" in previo:
+        metadata["metricas_test"] = previo["metricas_test"]
     destino["metadata"].write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return destino
 
