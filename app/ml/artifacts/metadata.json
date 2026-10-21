@@ -1,0 +1,630 @@
+{
+  "version": "mlp-e7f82554",
+  "fecha_entrenamiento": "2026-10-21T21:37:25+00:00",
+  "semilla": 42,
+  "arquitectura": {
+    "n_entrada": 234,
+    "n_clases": 99,
+    "hidden_layers": [
+      256,
+      128
+    ],
+    "dropout": 0.3
+  },
+  "entrenamiento": {
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "epochs_max": 30,
+    "patience": 5,
+    "class_weights": "balanced",
+    "mejor_epoca": 13,
+    "epocas_ejecutadas": 18
+  },
+  "datos": {
+    "filas_train": 49373,
+    "filas_val": 10581,
+    "vocabulario_sha256": "f619a3f7af91b2af02ff36f7a25fe4768b065b00c507d9f681e2a45db53eb953",
+    "torch": "2.14.1+cpu"
+  },
+  "metricas_val": {
+    "loss": 0.14144978063195762,
+    "top1": 0.9288347037142047,
+    "top3": 0.9909271335412532
+  },
+  "clases": [
+    {
+      "indice": 0,
+      "enfermedad_en": "infectious gastroenteritis",
+      "enfermedad_es": "gastroenteritis infecciosa",
+      "cie10_codigo": "A09"
+    },
+    {
+      "indice": 1,
+      "enfermedad_en": "shingles (herpes zoster)",
+      "enfermedad_es": "herpes zóster",
+      "cie10_codigo": "B02"
+    },
+    {
+      "indice": 2,
+      "enfermedad_en": "viral warts",
+      "enfermedad_es": "verrugas virales",
+      "cie10_codigo": "B07"
+    },
+    {
+      "indice": 3,
+      "enfermedad_en": "iron deficiency anemia",
+      "enfermedad_es": "anemia por deficiencia de hierro",
+      "cie10_codigo": "D50"
+    },
+    {
+      "indice": 4,
+      "enfermedad_en": "hypoglycemia",
+      "enfermedad_es": "hipoglucemia",
+      "cie10_codigo": "E16"
+    },
+    {
+      "indice": 5,
+      "enfermedad_en": "schizophrenia",
+      "enfermedad_es": "esquizofrenia",
+      "cie10_codigo": "F20"
+    },
+    {
+      "indice": 6,
+      "enfermedad_en": "bipolar disorder",
+      "enfermedad_es": "trastorno bipolar",
+      "cie10_codigo": "F31"
+    },
+    {
+      "indice": 7,
+      "enfermedad_en": "depression",
+      "enfermedad_es": "depresión",
+      "cie10_codigo": "F32"
+    },
+    {
+      "indice": 8,
+      "enfermedad_en": "anxiety",
+      "enfermedad_es": "ansiedad",
+      "cie10_codigo": "F41"
+    },
+    {
+      "indice": 9,
+      "enfermedad_en": "obsessive compulsive disorder (ocd)",
+      "enfermedad_es": "trastorno obsesivo compulsivo",
+      "cie10_codigo": "F42"
+    },
+    {
+      "indice": 10,
+      "enfermedad_en": "eating disorder",
+      "enfermedad_es": "trastorno de la conducta alimentaria",
+      "cie10_codigo": "F50"
+    },
+    {
+      "indice": 11,
+      "enfermedad_en": "attention deficit hyperactivity disorder (adhd)",
+      "enfermedad_es": "trastorno por déficit de atención e hiperactividad (TDAH)",
+      "cie10_codigo": "F90"
+    },
+    {
+      "indice": 12,
+      "enfermedad_en": "parkinson disease",
+      "enfermedad_es": "enfermedad de Parkinson",
+      "cie10_codigo": "G20"
+    },
+    {
+      "indice": 13,
+      "enfermedad_en": "multiple sclerosis",
+      "enfermedad_es": "esclerosis múltiple",
+      "cie10_codigo": "G35"
+    },
+    {
+      "indice": 14,
+      "enfermedad_en": "migraine",
+      "enfermedad_es": "migraña",
+      "cie10_codigo": "G43"
+    },
+    {
+      "indice": 15,
+      "enfermedad_en": "transient ischemic attack",
+      "enfermedad_es": "ataque isquémico transitorio",
+      "cie10_codigo": "G45"
+    },
+    {
+      "indice": 16,
+      "enfermedad_en": "obstructive sleep apnea (osa)",
+      "enfermedad_es": "apnea obstructiva del sueño",
+      "cie10_codigo": "G47"
+    },
+    {
+      "indice": 17,
+      "enfermedad_en": "bell palsy",
+      "enfermedad_es": "parálisis de Bell",
+      "cie10_codigo": "G51"
+    },
+    {
+      "indice": 18,
+      "enfermedad_en": "carpal tunnel syndrome",
+      "enfermedad_es": "síndrome del túnel carpiano",
+      "cie10_codigo": "G56"
+    },
+    {
+      "indice": 19,
+      "enfermedad_en": "stye",
+      "enfermedad_es": "orzuelo",
+      "cie10_codigo": "H00"
+    },
+    {
+      "indice": 20,
+      "enfermedad_en": "blepharitis",
+      "enfermedad_es": "blefaritis",
+      "cie10_codigo": "H01"
+    },
+    {
+      "indice": 21,
+      "enfermedad_en": "dry eye of unknown cause",
+      "enfermedad_es": "ojo seco",
+      "cie10_codigo": "H04"
+    },
+    {
+      "indice": 22,
+      "enfermedad_en": "conjunctivitis",
+      "enfermedad_es": "conjuntivitis",
+      "cie10_codigo": "H10"
+    },
+    {
+      "indice": 23,
+      "enfermedad_en": "cornea infection",
+      "enfermedad_es": "queratitis (infección de la córnea)",
+      "cie10_codigo": "H16"
+    },
+    {
+      "indice": 24,
+      "enfermedad_en": "cataract",
+      "enfermedad_es": "catarata",
+      "cie10_codigo": "H26"
+    },
+    {
+      "indice": 25,
+      "enfermedad_en": "glaucoma",
+      "enfermedad_es": "glaucoma",
+      "cie10_codigo": "H40"
+    },
+    {
+      "indice": 26,
+      "enfermedad_en": "myopia",
+      "enfermedad_es": "miopía",
+      "cie10_codigo": "H52"
+    },
+    {
+      "indice": 27,
+      "enfermedad_en": "otitis externa (swimmer's ear)",
+      "enfermedad_es": "otitis externa",
+      "cie10_codigo": "H60"
+    },
+    {
+      "indice": 28,
+      "enfermedad_en": "acute otitis media",
+      "enfermedad_es": "otitis media aguda",
+      "cie10_codigo": "H66"
+    },
+    {
+      "indice": 29,
+      "enfermedad_en": "benign paroxysmal positional vertical (bppv)",
+      "enfermedad_es": "vértigo posicional paroxístico benigno",
+      "cie10_codigo": "H81"
+    },
+    {
+      "indice": 30,
+      "enfermedad_en": "sensorineural hearing loss",
+      "enfermedad_es": "hipoacusia neurosensorial",
+      "cie10_codigo": "H90"
+    },
+    {
+      "indice": 31,
+      "enfermedad_en": "hypertensive heart disease",
+      "enfermedad_es": "cardiopatía hipertensiva",
+      "cie10_codigo": "I11"
+    },
+    {
+      "indice": 32,
+      "enfermedad_en": "angina",
+      "enfermedad_es": "angina de pecho",
+      "cie10_codigo": "I20"
+    },
+    {
+      "indice": 33,
+      "enfermedad_en": "heart attack",
+      "enfermedad_es": "infarto agudo de miocardio",
+      "cie10_codigo": "I21"
+    },
+    {
+      "indice": 34,
+      "enfermedad_en": "pulmonary embolism",
+      "enfermedad_es": "embolia pulmonar",
+      "cie10_codigo": "I26"
+    },
+    {
+      "indice": 35,
+      "enfermedad_en": "paroxysmal supraventricular tachycardia",
+      "enfermedad_es": "taquicardia supraventricular paroxística",
+      "cie10_codigo": "I47"
+    },
+    {
+      "indice": 36,
+      "enfermedad_en": "heart failure",
+      "enfermedad_es": "insuficiencia cardíaca",
+      "cie10_codigo": "I50"
+    },
+    {
+      "indice": 37,
+      "enfermedad_en": "stroke",
+      "enfermedad_es": "accidente cerebrovascular",
+      "cie10_codigo": "I64"
+    },
+    {
+      "indice": 38,
+      "enfermedad_en": "thrombophlebitis",
+      "enfermedad_es": "tromboflebitis",
+      "cie10_codigo": "I80"
+    },
+    {
+      "indice": 39,
+      "enfermedad_en": "hemorrhoids",
+      "enfermedad_es": "hemorroides",
+      "cie10_codigo": "I84"
+    },
+    {
+      "indice": 40,
+      "enfermedad_en": "common cold",
+      "enfermedad_es": "resfriado común",
+      "cie10_codigo": "J00"
+    },
+    {
+      "indice": 41,
+      "enfermedad_en": "acute sinusitis",
+      "enfermedad_es": "sinusitis aguda",
+      "cie10_codigo": "J01"
+    },
+    {
+      "indice": 42,
+      "enfermedad_en": "strep throat",
+      "enfermedad_es": "faringitis estreptocócica",
+      "cie10_codigo": "J02"
+    },
+    {
+      "indice": 43,
+      "enfermedad_en": "tonsillitis",
+      "enfermedad_es": "amigdalitis",
+      "cie10_codigo": "J03"
+    },
+    {
+      "indice": 44,
+      "enfermedad_en": "laryngitis",
+      "enfermedad_es": "laringitis",
+      "cie10_codigo": "J04"
+    },
+    {
+      "indice": 45,
+      "enfermedad_en": "croup",
+      "enfermedad_es": "crup",
+      "cie10_codigo": "J05"
+    },
+    {
+      "indice": 46,
+      "enfermedad_en": "flu",
+      "enfermedad_es": "influenza (gripe)",
+      "cie10_codigo": "J11"
+    },
+    {
+      "indice": 47,
+      "enfermedad_en": "pneumonia",
+      "enfermedad_es": "neumonía",
+      "cie10_codigo": "J18"
+    },
+    {
+      "indice": 48,
+      "enfermedad_en": "acute bronchitis",
+      "enfermedad_es": "bronquitis aguda",
+      "cie10_codigo": "J20"
+    },
+    {
+      "indice": 49,
+      "enfermedad_en": "acute bronchiolitis",
+      "enfermedad_es": "bronquiolitis aguda",
+      "cie10_codigo": "J21"
+    },
+    {
+      "indice": 50,
+      "enfermedad_en": "seasonal allergies (hay fever)",
+      "enfermedad_es": "rinitis alérgica estacional",
+      "cie10_codigo": "J30"
+    },
+    {
+      "indice": 51,
+      "enfermedad_en": "chronic sinusitis",
+      "enfermedad_es": "sinusitis crónica",
+      "cie10_codigo": "J32"
+    },
+    {
+      "indice": 52,
+      "enfermedad_en": "asthma",
+      "enfermedad_es": "asma",
+      "cie10_codigo": "J45"
+    },
+    {
+      "indice": 53,
+      "enfermedad_en": "dental caries",
+      "enfermedad_es": "caries dental",
+      "cie10_codigo": "K02"
+    },
+    {
+      "indice": 54,
+      "enfermedad_en": "gum disease",
+      "enfermedad_es": "gingivitis y enfermedad periodontal",
+      "cie10_codigo": "K05"
+    },
+    {
+      "indice": 55,
+      "enfermedad_en": "esophagitis",
+      "enfermedad_es": "esofagitis",
+      "cie10_codigo": "K20"
+    },
+    {
+      "indice": 56,
+      "enfermedad_en": "gastroesophageal reflux disease (gerd)",
+      "enfermedad_es": "enfermedad por reflujo gastroesofágico (ERGE)",
+      "cie10_codigo": "K21"
+    },
+    {
+      "indice": 57,
+      "enfermedad_en": "gastroduodenal ulcer",
+      "enfermedad_es": "úlcera gastroduodenal",
+      "cie10_codigo": "K27"
+    },
+    {
+      "indice": 58,
+      "enfermedad_en": "gastritis",
+      "enfermedad_es": "gastritis",
+      "cie10_codigo": "K29"
+    },
+    {
+      "indice": 59,
+      "enfermedad_en": "appendicitis",
+      "enfermedad_es": "apendicitis aguda",
+      "cie10_codigo": "K35"
+    },
+    {
+      "indice": 60,
+      "enfermedad_en": "inguinal hernia",
+      "enfermedad_es": "hernia inguinal",
+      "cie10_codigo": "K40"
+    },
+    {
+      "indice": 61,
+      "enfermedad_en": "hiatal hernia",
+      "enfermedad_es": "hernia de hiato",
+      "cie10_codigo": "K44"
+    },
+    {
+      "indice": 62,
+      "enfermedad_en": "crohn disease",
+      "enfermedad_es": "enfermedad de Crohn",
+      "cie10_codigo": "K50"
+    },
+    {
+      "indice": 63,
+      "enfermedad_en": "ulcerative colitis",
+      "enfermedad_es": "colitis ulcerosa",
+      "cie10_codigo": "K51"
+    },
+    {
+      "indice": 64,
+      "enfermedad_en": "intestinal obstruction",
+      "enfermedad_es": "obstrucción intestinal",
+      "cie10_codigo": "K56"
+    },
+    {
+      "indice": 65,
+      "enfermedad_en": "diverticulitis",
+      "enfermedad_es": "diverticulitis",
+      "cie10_codigo": "K57"
+    },
+    {
+      "indice": 66,
+      "enfermedad_en": "irritable bowel syndrome",
+      "enfermedad_es": "síndrome de intestino irritable",
+      "cie10_codigo": "K58"
+    },
+    {
+      "indice": 67,
+      "enfermedad_en": "chronic constipation",
+      "enfermedad_es": "estreñimiento crónico",
+      "cie10_codigo": "K59"
+    },
+    {
+      "indice": 68,
+      "enfermedad_en": "cholecystitis",
+      "enfermedad_es": "colecistitis",
+      "cie10_codigo": "K81"
+    },
+    {
+      "indice": 69,
+      "enfermedad_en": "acute pancreatitis",
+      "enfermedad_es": "pancreatitis aguda",
+      "cie10_codigo": "K85"
+    },
+    {
+      "indice": 70,
+      "enfermedad_en": "impetigo",
+      "enfermedad_es": "impétigo",
+      "cie10_codigo": "L01"
+    },
+    {
+      "indice": 71,
+      "enfermedad_en": "seborrheic dermatitis",
+      "enfermedad_es": "dermatitis seborreica",
+      "cie10_codigo": "L21"
+    },
+    {
+      "indice": 72,
+      "enfermedad_en": "diaper rash",
+      "enfermedad_es": "dermatitis del pañal",
+      "cie10_codigo": "L22"
+    },
+    {
+      "indice": 73,
+      "enfermedad_en": "contact dermatitis",
+      "enfermedad_es": "dermatitis de contacto",
+      "cie10_codigo": "L25"
+    },
+    {
+      "indice": 74,
+      "enfermedad_en": "eczema",
+      "enfermedad_es": "eccema",
+      "cie10_codigo": "L30"
+    },
+    {
+      "indice": 75,
+      "enfermedad_en": "psoriasis",
+      "enfermedad_es": "psoriasis",
+      "cie10_codigo": "L40"
+    },
+    {
+      "indice": 76,
+      "enfermedad_en": "acne",
+      "enfermedad_es": "acné",
+      "cie10_codigo": "L70"
+    },
+    {
+      "indice": 77,
+      "enfermedad_en": "rosacea",
+      "enfermedad_es": "rosácea",
+      "cie10_codigo": "L71"
+    },
+    {
+      "indice": 78,
+      "enfermedad_en": "rheumatoid arthritis",
+      "enfermedad_es": "artritis reumatoide",
+      "cie10_codigo": "M06"
+    },
+    {
+      "indice": 79,
+      "enfermedad_en": "gout",
+      "enfermedad_es": "gota",
+      "cie10_codigo": "M10"
+    },
+    {
+      "indice": 80,
+      "enfermedad_en": "osteoarthritis",
+      "enfermedad_es": "osteoartritis",
+      "cie10_codigo": "M19"
+    },
+    {
+      "indice": 81,
+      "enfermedad_en": "spondylosis",
+      "enfermedad_es": "espondilosis",
+      "cie10_codigo": "M47"
+    },
+    {
+      "indice": 82,
+      "enfermedad_en": "spinal stenosis",
+      "enfermedad_es": "estenosis espinal",
+      "cie10_codigo": "M48"
+    },
+    {
+      "indice": 83,
+      "enfermedad_en": "herniated disk",
+      "enfermedad_es": "hernia de disco",
+      "cie10_codigo": "M51"
+    },
+    {
+      "indice": 84,
+      "enfermedad_en": "chronic back pain",
+      "enfermedad_es": "dolor crónico de espalda",
+      "cie10_codigo": "M54"
+    },
+    {
+      "indice": 85,
+      "enfermedad_en": "bursitis",
+      "enfermedad_es": "bursitis",
+      "cie10_codigo": "M71"
+    },
+    {
+      "indice": 86,
+      "enfermedad_en": "fibromyalgia",
+      "enfermedad_es": "fibromialgia",
+      "cie10_codigo": "M79"
+    },
+    {
+      "indice": 87,
+      "enfermedad_en": "osteoporosis",
+      "enfermedad_es": "osteoporosis",
+      "cie10_codigo": "M81"
+    },
+    {
+      "indice": 88,
+      "enfermedad_en": "acute kidney injury",
+      "enfermedad_es": "lesión renal aguda",
+      "cie10_codigo": "N17"
+    },
+    {
+      "indice": 89,
+      "enfermedad_en": "kidney stone",
+      "enfermedad_es": "cálculos renales",
+      "cie10_codigo": "N20"
+    },
+    {
+      "indice": 90,
+      "enfermedad_en": "cystitis",
+      "enfermedad_es": "cistitis",
+      "cie10_codigo": "N30"
+    },
+    {
+      "indice": 91,
+      "enfermedad_en": "urethritis",
+      "enfermedad_es": "uretritis",
+      "cie10_codigo": "N34"
+    },
+    {
+      "indice": 92,
+      "enfermedad_en": "urinary tract infection",
+      "enfermedad_es": "infección de vías urinarias",
+      "cie10_codigo": "N39"
+    },
+    {
+      "indice": 93,
+      "enfermedad_en": "benign prostatic hyperplasia (bph)",
+      "enfermedad_es": "hiperplasia prostática benigna",
+      "cie10_codigo": "N40"
+    },
+    {
+      "indice": 94,
+      "enfermedad_en": "prostatitis",
+      "enfermedad_es": "prostatitis",
+      "cie10_codigo": "N41"
+    },
+    {
+      "indice": 95,
+      "enfermedad_en": "epididymitis",
+      "enfermedad_es": "epididimitis",
+      "cie10_codigo": "N45"
+    },
+    {
+      "indice": 96,
+      "enfermedad_en": "pelvic inflammatory disease",
+      "enfermedad_es": "enfermedad inflamatoria pélvica",
+      "cie10_codigo": "N73"
+    },
+    {
+      "indice": 97,
+      "enfermedad_en": "vaginitis",
+      "enfermedad_es": "vaginitis",
+      "cie10_codigo": "N76"
+    },
+    {
+      "indice": 98,
+      "enfermedad_en": "endometriosis",
+      "enfermedad_es": "endometriosis",
+      "cie10_codigo": "N80"
+    }
+  ]
+}

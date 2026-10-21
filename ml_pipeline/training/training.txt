@@ -1,8 +1,25 @@
 FUNCIONES Y METODOS: TRAINING
 
-Métodos de entrenamiendo para el modelo de IA seleccionado
+Entrenamiento y evaluacion del MLP. Se ejecuta desde backend/ despues del ETL.
 
-- train.py: script de entranamiento de mlp
-- evaluate.py: evaluación de respuestas de mlp
+- train.py: python -m ml_pipeline.training.train
+	- cargar_datos(): lee dataset.parquet, classes.json y symptoms.json y comprueba que sean coherentes
+	  (mismo orden de columnas que el vocabulario, mismas clases). Solo carga los splits train y val
+	- pesos_por_clase(): peso n / (n_clases * casos) para compensar enfermedades con pocos casos
+	- entrenar(): Adam + CrossEntropyLoss. Cada epoca mide val; guarda los pesos de la epoca con menor
+	  perdida en val y se detiene tras `patience` epocas sin mejora. Misma semilla, mismo resultado
+	- guardar(): escribe app/ml/artifacts/model.pt (solo pesos, state_dict) y metadata.json
+- evaluate.py: evaluacion final sobre el split test (pendiente). Se corre una sola vez, al terminar de
+  ajustar hiperparametros, para que la cifra no este sesgada por haber elegido el modelo mirando test
 
-- config.yaml: ahora esta en ml_pipeline/config.yaml (lo usan el ETL y el entrenamiento)
+La arquitectura vive en app/ml/model.py (crear_mlp) porque la usan el entrenamiento y el predictor.
+metadata.json guarda lo necesario para reconstruirla: n_entrada, n_clases, hidden_layers, dropout,
+ademas de la version (hash de los pesos), las metricas en val, las clases en orden de indice y el
+sha256 de symptoms.json con el que se entreno.
+
+Hiperparametros en ml_pipeline/config.yaml (seccion train). class_weights: balanced pondera la perdida
+por clase; mejora el recall de enfermedades raras pero hace que las probabilidades salgan menos
+calibradas (sesgadas hacia las clases raras). 'none' deja las probabilidades mas cercanas a la
+frecuencia real del dataset.
+
+Pruebas: python -m pytest tests/training tests/ml/test_model.py

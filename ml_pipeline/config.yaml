@@ -21,4 +21,6 @@ train:
   dropout: 0.3
   learning_rate: 0.001
   batch_size: 256
-  epochs: 30
+  epochs: 30            # máximo; el entrenamiento para antes si val deja de mejorar
+  patience: 5           # épocas seguidas sin mejora en val antes de parar
+  class_weights: balanced  # balanced: pesa más las enfermedades con pocos casos; none: sin pesos

@@ -7,6 +7,7 @@ Capa extra para el manejo del modelo de IA
 	- normalizar_texto(): minusculas, sin acentos, un espacio entre palabras
 	- vectorizar_sintomas(nombres, vocabulario): vector 0/1 en el orden de symptoms.json
 	- cargar_vocabulario(): lee symptoms.json
+- model.py: crear_mlp(), la arquitectura del MLP (la usan train.py y predictor.py para construir la misma red)
 - artifacts/: carpeta del modelo entrenado y lista de sintomas, lo que produce el entrenamiento
 	- model.pt
 	- symptoms.json: vocabulario ordenado de sintomas (lo escribe el ETL)
