@@ -1,10 +1,16 @@
 FUNCIONES Y METODOS: ML
 
-Capa extra para el manejo del modelo de IA 
+Capa extra para el manejo del modelo de IA
 
 - predictor.py: carga artifacts y predice
-- features.py: normalización y vectorización compartida
-- artifact/: carpeta del modelo entrenado y lista de síntomas, lo que produce el entrenamiento
-	- model.joblib
-	- symptoms.json: vocabulario ordenado de síntomas
-	- metadata.json: versión, fecha, métricas, clases
+- features.py: normalizacion y vectorizacion compartida (lo usan el ETL, el entrenamiento y el predictor)
+	- normalizar_texto(): minusculas, sin acentos, un espacio entre palabras
+	- vectorizar_sintomas(nombres, vocabulario): vector 0/1 en el orden de symptoms.json
+	- cargar_vocabulario(): lee symptoms.json
+- artifacts/: carpeta del modelo entrenado y lista de sintomas, lo que produce el entrenamiento
+	- model.pt
+	- symptoms.json: vocabulario ordenado de sintomas (lo escribe el ETL)
+	- metadata.json: version, fecha, metricas, clases
+
+Las claves de los sintomas y las enfermedades son los nombres en ingles (sintomas.nombresintoma y
+enfermedades.descripcion en la BD). El espanol (nombre_es, descripcion_es) es solo para mostrar.

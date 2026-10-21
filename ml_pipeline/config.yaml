@@ -1,0 +1,24 @@
+# Configuración compartida por el ETL y el entrenamiento.
+# Las rutas son relativas a la carpeta backend/.
+
+seed: 42  # fija la aleatoriedad: mismo resultado en cada ejecución
+
+paths:
+  raw: ml_pipeline/data/raw
+  processed: ml_pipeline/data/processed
+  artifacts: app/ml/artifacts
+  mappings: ml_pipeline/mappings
+
+data:
+  symptoms_csv: DiseaseAndSymptoms.csv
+  min_unique_cases: 200   # mínimo de casos únicos por enfermedad; el ETL falla si alguna queda por debajo
+  val_size: 0.15
+  test_size: 0.15
+
+# Hiperparámetros del MLP: valores iniciales para ajustar, no definitivos.
+train:
+  hidden_layers: [256, 128]
+  dropout: 0.3
+  learning_rate: 0.001
+  batch_size: 256
+  epochs: 30
