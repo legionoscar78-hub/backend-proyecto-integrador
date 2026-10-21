@@ -5,5 +5,5 @@ La carpeta services seria nuestra capa lógica o de negocio
 - auth_service.py: servicio de inicio de sesión
 - paciente_service.py: servicio de operaciones de pacientes
 - consulta_service.py: coordina síntomas, ia, guardar
-- prediccon_service.py: llama al modelo y arroja resultados
+- prediccion_service.py: llama al predictor y arroja resultados (quita sintomas repetidos y ajusta top_n)
 - dashboard_service.py: lee lo generado

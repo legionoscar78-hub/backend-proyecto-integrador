@@ -2,7 +2,11 @@ FUNCIONES Y METODOS: ML
 
 Capa extra para el manejo del modelo de IA
 
-- predictor.py: carga artifacts y predice
+- predictor.py: carga el modelo una vez al arrancar (iniciar(), desde el lifespan de main.py) y predice
+	- Predictor.predecir(sintomas, top_n): top-N enfermedades con probabilidad; el orden y las repeticiones no importan
+	- obtener(): el predictor cargado o ModeloNoDisponible (la API responde 503); si faltan artefactos la API
+	  arranca igual y solo falla el endpoint de prediccion
+	- estado(): version, fecha y metricas del modelo cargado (o el motivo por el que no hay modelo)
 - features.py: normalizacion y vectorizacion compartida (lo usan el ETL, el entrenamiento y el predictor)
 	- normalizar_texto(): minusculas, sin acentos, un espacio entre palabras
 	- vectorizar_sintomas(nombres, vocabulario): vector 0/1 en el orden de symptoms.json

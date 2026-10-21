@@ -9,6 +9,11 @@ La carpeta api es la capa presentación de nuestro proyecto en el caso del backe
 	- consultas.py: operaciones relacionadas con capturar consultas
 	- historial.py: historial de consultas realizadas
 	- dashboard.py: retorno de datos específicos consultados
+	- ml.py (implementado, prefijo /api/v1/ml):
+		- POST /predecir: {sintomas: [...], top_n} -> enfermedades probables con probabilidad. 422 si un
+		  sintoma no esta en el vocabulario del modelo, 503 si el modelo no esta cargado
+		- GET /estado: si hay modelo cargado, su version y sus metricas de test
+		- pendiente: exigir sesion de medico cuando exista auth
 
 
 

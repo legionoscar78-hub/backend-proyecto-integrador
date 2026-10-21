@@ -2,4 +2,5 @@ FUNCIONES Y METODOS: SCHEMAS
 
 Contratos de entrada y salida
 
-- prediccion.py: lista de 3-5 enfermedades con porcentaje de probabilidad
+- prediccion.py: entrada (sintomas + top_n) y salida (lista de enfermedades con probabilidad, version del modelo
+  y un aviso de que el resultado es orientativo)
