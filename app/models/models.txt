@@ -1,3 +1,8 @@
 FUNCIONES Y METODOS: MODELS
 
 La carpeta models es nuestra capa de entidades de la base de datos. Cada archivo representa los campos de su respectiva tabla en la base de datos
+
+Tablas (Alembic crea el esquema: alembic upgrade head)
+- medico.py, paciente.py, consulta.py (+ tabla consulta_sintoma), prediccion.py (Prediccion y PrediccionDetalle)
+- enfermedad.py, sintoma.py, enfermedad_detalle.py: catalogo, con los nombres del diseno SQL (enfermedades, sintomas, enfermedadesdetalle)
+- __init__.py: importa todos los modelos para que Alembic los detecte

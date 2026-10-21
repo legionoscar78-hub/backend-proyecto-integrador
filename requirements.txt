@@ -1,9 +1,12 @@
-FastAPI
-Uvicorn
-SQLAlchemy
-Psycopg
-Alembic
-Pydantic-settings
-Argon2-cffi
-Pyjwt
-PyTorch
+# API (lo que necesita el servidor en producción)
+fastapi==0.143.2
+uvicorn==0.54.0
+SQLAlchemy==2.1.4
+psycopg[binary]==3.3.6
+alembic==1.20.0
+pydantic-settings==2.16.0
+argon2-cffi==25.1.0
+PyJWT==2.15.1
+
+# Inferencia del modelo (model.pt, MLP en PyTorch)
+torch==2.14.1
