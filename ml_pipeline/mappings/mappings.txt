@@ -1,0 +1,16 @@
+FUNCIONES Y METODOS: MAPPINGS
+
+Catalogos editables que usan el ETL y el entrenamiento. Son la fuente de verdad: si se corrige
+una traduccion o un codigo, se edita aqui (el notebook 02_eda_sintomas los valida).
+
+- label_map.csv: las enfermedades que cubre el modelo (espacio de etiquetas)
+	- enfermedad_en: nombre en el dataset; es el mismo texto de enfermedades.descripcion en la BD
+	- enfermedad_es, cie10_codigo (3 caracteres), cie10_descripcion (texto de ICD-10.csv)
+	- tipo_mapeo: exacto = el codigo coincide con la enfermedad; amplio = categoria mas general
+	- sistema, casos_originales, casos_unicos, sintomas_posibles: informativos
+- sintomas.csv: vocabulario de sintomas, en el orden de columnas del dataset
+	- nombre_en: clave estable (igual a sintomas.nombresintoma en la BD); nombre_es: para mostrar
+	- usado_en_modelo = 1: los sintomas que formaran symptoms.json (orden = columna "orden")
+
+Propuesta inicial: la seleccion de enfermedades, los codigos CIE-10 y las traducciones deben ser
+revisados por alguien con formacion medica antes de usarse con pacientes.

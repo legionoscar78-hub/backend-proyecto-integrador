@@ -1,0 +1,100 @@
+﻿enfermedad_en,enfermedad_es,cie10_codigo,cie10_descripcion,tipo_mapeo,sistema,casos_originales,casos_unicos,sintomas_posibles
+transient ischemic attack,ataque isquémico transitorio,G45,Transient cerebral ischaemic attacks and related syndromes,exacto,Cardiovascular,655,525,10
+hypertensive heart disease,cardiopatía hipertensiva,I11,Hypertensive heart disease,exacto,Cardiovascular,902,804,11
+angina,angina de pecho,I20,Angina pectoris,exacto,Cardiovascular,906,826,11
+heart attack,infarto agudo de miocardio,I21,Acute myocardial infarction,exacto,Cardiovascular,907,810,11
+pulmonary embolism,embolia pulmonar,I26,Pulmonary embolism,exacto,Cardiovascular,880,791,11
+paroxysmal supraventricular tachycardia,taquicardia supraventricular paroxística,I47,Paroxysmal tachycardia,amplio,Cardiovascular,375,261,9
+heart failure,insuficiencia cardíaca,I50,Heart failure,exacto,Cardiovascular,903,813,11
+stroke,accidente cerebrovascular,I64,"Stroke, not specified as haemorrhage or infarction",exacto,Cardiovascular,642,478,10
+thrombophlebitis,tromboflebitis,I80,Phlebitis and thrombophlebitis,exacto,Cardiovascular,451,292,9
+hemorrhoids,hemorroides,I84,Haemorrhoids,exacto,Cardiovascular,908,818,11
+infectious gastroenteritis,gastroenteritis infecciosa,A09,Other gastroenteritis and colitis of infectious and unspecified origin,exacto,Digestivo,1212,1212,12
+dental caries,caries dental,K02,Dental caries,exacto,Digestivo,1185,1185,12
+gum disease,gingivitis y enfermedad periodontal,K05,Gingivitis and periodontal diseases,exacto,Digestivo,894,803,11
+esophagitis,esofagitis,K20,Oesophagitis,exacto,Digestivo,1215,1215,12
+gastroesophageal reflux disease (gerd),enfermedad por reflujo gastroesofágico (ERGE),K21,Gastro-oesophageal reflux disease,exacto,Digestivo,448,302,10
+gastroduodenal ulcer,úlcera gastroduodenal,K27,"Peptic ulcer, site unspecified",amplio,Digestivo,683,526,10
+gastritis,gastritis,K29,Gastritis and duodenitis,exacto,Digestivo,679,527,10
+appendicitis,apendicitis aguda,K35,Acute appendicitis,exacto,Digestivo,903,808,11
+inguinal hernia,hernia inguinal,K40,Inguinal hernia,exacto,Digestivo,402,373,10
+hiatal hernia,hernia de hiato,K44,Diaphragmatic hernia,exacto,Digestivo,906,815,12
+crohn disease,enfermedad de Crohn,K50,Crohn disease [regional enteritis],exacto,Digestivo,376,273,10
+ulcerative colitis,colitis ulcerosa,K51,Ulcerative colitis,exacto,Digestivo,377,269,9
+intestinal obstruction,obstrucción intestinal,K56,Paralytic ileus and intestinal obstruction without hernia,amplio,Digestivo,445,288,9
+diverticulitis,diverticulitis,K57,Diverticular disease of intestine,amplio,Digestivo,1214,1214,12
+irritable bowel syndrome,síndrome de intestino irritable,K58,Irritable bowel syndrome,exacto,Digestivo,510,323,9
+chronic constipation,estreñimiento crónico,K59,Other functional intestinal disorders,amplio,Digestivo,913,827,11
+cholecystitis,colecistitis,K81,Cholecystitis,exacto,Digestivo,1204,1204,12
+acute pancreatitis,pancreatitis aguda,K85,Acute pancreatitis,exacto,Digestivo,1207,1207,12
+hypoglycemia,hipoglucemia,E16,Other disorders of pancreatic internal secretion,amplio,Endocrino,1215,1215,12
+acute kidney injury,lesión renal aguda,N17,Acute renal failure,exacto,Genitourinario,908,808,11
+kidney stone,cálculos renales,N20,Calculus of kidney and ureter,exacto,Genitourinario,904,792,11
+cystitis,cistitis,N30,Cystitis,exacto,Genitourinario,1219,1219,12
+urethritis,uretritis,N34,Urethritis and urethral syndrome,exacto,Genitourinario,453,299,9
+urinary tract infection,infección de vías urinarias,N39,Other disorders of urinary system,amplio,Genitourinario,910,815,11
+benign prostatic hyperplasia (bph),hiperplasia prostática benigna,N40,Hyperplasia of prostate,exacto,Genitourinario,1206,1206,12
+prostatitis,prostatitis,N41,Inflammatory diseases of prostate,exacto,Genitourinario,681,510,10
+epididymitis,epididimitis,N45,Orchitis and epididymitis,amplio,Genitourinario,511,320,9
+pelvic inflammatory disease,enfermedad inflamatoria pélvica,N73,Other female pelvic inflammatory diseases,exacto,Genitourinario,900,804,11
+vaginitis,vaginitis,N76,Other inflammation of vagina and vulva,amplio,Genitourinario,909,821,11
+endometriosis,endometriosis,N80,Endometriosis,exacto,Genitourinario,378,267,9
+iron deficiency anemia,anemia por deficiencia de hierro,D50,Iron deficiency anaemia,exacto,Hematológico,683,530,11
+rheumatoid arthritis,artritis reumatoide,M06,Other rheumatoid arthritis,amplio,Musculoesquelético,678,518,10
+gout,gota,M10,Gout,exacto,Musculoesquelético,1211,1211,12
+osteoarthritis,osteoartritis,M19,Other arthrosis,amplio,Musculoesquelético,896,796,11
+spondylosis,espondilosis,M47,Spondylosis,exacto,Musculoesquelético,1216,1216,12
+spinal stenosis,estenosis espinal,M48,Other spondylopathies,amplio,Musculoesquelético,1207,1207,12
+herniated disk,hernia de disco,M51,Other intervertebral disc disorders,amplio,Musculoesquelético,908,828,11
+chronic back pain,dolor crónico de espalda,M54,Dorsalgia,amplio,Musculoesquelético,899,805,11
+bursitis,bursitis,M71,Other bursopathies,amplio,Musculoesquelético,1208,1208,12
+fibromyalgia,fibromialgia,M79,"Other soft tissue disorders, not elsewhere classified",amplio,Musculoesquelético,656,503,10
+osteoporosis,osteoporosis,M81,Osteoporosis without pathological fracture,exacto,Musculoesquelético,378,272,9
+parkinson disease,enfermedad de Parkinson,G20,Parkinson disease,exacto,Neurológico,513,315,9
+multiple sclerosis,esclerosis múltiple,G35,Multiple sclerosis,exacto,Neurológico,910,825,11
+migraine,migraña,G43,Migraine,exacto,Neurológico,221,203,9
+bell palsy,parálisis de Bell,G51,Facial nerve disorders,amplio,Neurológico,685,534,10
+carpal tunnel syndrome,síndrome del túnel carpiano,G56,Mononeuropathies of upper limb,amplio,Neurológico,896,819,11
+stye,orzuelo,H00,Hordeolum and chalazion,exacto,Ojos y oídos,908,832,11
+blepharitis,blefaritis,H01,Other inflammation of eyelid,amplio,Ojos y oídos,906,802,11
+dry eye of unknown cause,ojo seco,H04,Disorders of lacrimal system,amplio,Ojos y oídos,861,787,11
+conjunctivitis,conjuntivitis,H10,Conjunctivitis,exacto,Ojos y oídos,909,825,11
+cornea infection,queratitis (infección de la córnea),H16,Keratitis,amplio,Ojos y oídos,903,816,11
+cataract,catarata,H26,Other cataract,amplio,Ojos y oídos,607,484,10
+glaucoma,glaucoma,H40,Glaucoma,exacto,Ojos y oídos,498,313,9
+myopia,miopía,H52,Disorders of refraction and accommodation,amplio,Ojos y oídos,448,292,9
+otitis externa (swimmer's ear),otitis externa,H60,Otitis externa,exacto,Ojos y oídos,904,808,11
+acute otitis media,otitis media aguda,H66,Suppurative and unspecified otitis media,amplio,Ojos y oídos,683,537,10
+benign paroxysmal positional vertical (bppv),vértigo posicional paroxístico benigno,H81,Disorders of vestibular function,amplio,Ojos y oídos,443,285,9
+sensorineural hearing loss,hipoacusia neurosensorial,H90,Conductive and sensorineural hearing loss,exacto,Ojos y oídos,681,529,10
+shingles (herpes zoster),herpes zóster,B02,Zoster [herpes zoster],exacto,Piel,379,244,9
+viral warts,verrugas virales,B07,Viral warts,exacto,Piel,453,289,9
+impetigo,impétigo,L01,Impetigo,exacto,Piel,683,523,10
+seborrheic dermatitis,dermatitis seborreica,L21,Seborrhoeic dermatitis,exacto,Piel,880,800,11
+diaper rash,dermatitis del pañal,L22,Diaper [napkin] dermatitis,exacto,Piel,897,809,11
+contact dermatitis,dermatitis de contacto,L25,Unspecified contact dermatitis,exacto,Piel,909,823,11
+eczema,eccema,L30,Other dermatitis,amplio,Piel,1207,1207,12
+psoriasis,psoriasis,L40,Psoriasis,exacto,Piel,912,825,11
+acne,acné,L70,Acne,exacto,Piel,496,306,9
+rosacea,rosácea,L71,Rosacea,exacto,Piel,678,521,10
+obstructive sleep apnea (osa),apnea obstructiva del sueño,G47,Sleep disorders,amplio,Respiratorio,1196,1196,12
+common cold,resfriado común,J00,Acute nasopharyngitis [common cold],exacto,Respiratorio,905,813,11
+acute sinusitis,sinusitis aguda,J01,Acute sinusitis,exacto,Respiratorio,906,828,11
+strep throat,faringitis estreptocócica,J02,Acute pharyngitis,amplio,Respiratorio,1210,1210,12
+tonsillitis,amigdalitis,J03,Acute tonsillitis,exacto,Respiratorio,446,286,9
+laryngitis,laringitis,J04,Acute laryngitis and tracheitis,exacto,Respiratorio,678,522,10
+croup,crup,J05,Acute obstructive laryngitis [croup] and epiglottitis,exacto,Respiratorio,904,807,11
+flu,influenza (gripe),J11,"Influenza, virus not identified",exacto,Respiratorio,679,521,10
+pneumonia,neumonía,J18,"Pneumonia, organism unspecified",exacto,Respiratorio,1212,1212,12
+acute bronchitis,bronquitis aguda,J20,Acute bronchitis,exacto,Respiratorio,1213,1213,12
+acute bronchiolitis,bronquiolitis aguda,J21,Acute bronchiolitis,exacto,Respiratorio,1204,1204,12
+seasonal allergies (hay fever),rinitis alérgica estacional,J30,Vasomotor and allergic rhinitis,amplio,Respiratorio,910,816,11
+chronic sinusitis,sinusitis crónica,J32,Chronic sinusitis,exacto,Respiratorio,657,507,10
+asthma,asma,J45,Asthma,exacto,Respiratorio,904,814,11
+schizophrenia,esquizofrenia,F20,Schizophrenia,exacto,Salud mental,890,811,11
+bipolar disorder,trastorno bipolar,F31,Bipolar affective disorder,exacto,Salud mental,663,537,10
+depression,depresión,F32,Depressive episode,exacto,Salud mental,912,830,11
+anxiety,ansiedad,F41,Other anxiety disorders,amplio,Salud mental,1198,1198,12
+obsessive compulsive disorder (ocd),trastorno obsesivo compulsivo,F42,Obsessive-compulsive disorder,exacto,Salud mental,454,286,9
+eating disorder,trastorno de la conducta alimentaria,F50,Eating disorders,exacto,Salud mental,494,302,9
+attention deficit hyperactivity disorder (adhd),trastorno por déficit de atención e hiperactividad (TDAH),F90,Hyperkinetic disorders,amplio,Salud mental,507,310,9
