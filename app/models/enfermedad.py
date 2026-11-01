@@ -1,20 +1,18 @@
-from sqlalchemy import Identity, String
+from sqlalchemy import Identity, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
 
 class Enfermedad(Base):
-    """Catálogo de enfermedades. Los nombres de tabla y columna son los del diseño SQL."""
+    """Tabla enfermedades del diseño SQL (docs/ScriptDb.sql)."""
 
     __tablename__ = "enfermedades"
+    __table_args__ = (UniqueConstraint("nombreenfermedad", name="uq_enfermedades_nombre"),)
 
-    id: Mapped[int] = mapped_column("enfermedadid", Identity(), primary_key=True)
-    # Nombre en inglés: clave estable, igual al dataset y a las clases del modelo
-    descripcion: Mapped[str] = mapped_column(String(500))
-    # Solo las enfermedades que cubre el modelo (label_map.csv) tienen estos dos campos
-    descripcion_es: Mapped[str | None] = mapped_column(String(500))
-    cie10_codigo: Mapped[str | None] = mapped_column(String(3))
+    id: Mapped[int] = mapped_column("enfermedadid", Identity(always=True), primary_key=True)
+    nombre: Mapped[str] = mapped_column("nombreenfermedad", String(150))
+    descripcion: Mapped[str | None] = mapped_column(Text)
 
     sintomas: Mapped[list["Sintoma"]] = relationship(
         secondary="enfermedadesdetalle", viewonly=True

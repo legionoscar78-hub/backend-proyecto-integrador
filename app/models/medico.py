@@ -1,21 +1,23 @@
-from datetime import datetime
-
-from sqlalchemy import DateTime, Identity, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Identity, String, Text, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
 
 class Medico(Base):
-    __tablename__ = "medico"
+    """Tabla medicos del diseño SQL (docs/ScriptDb.sql)."""
 
-    id: Mapped[int] = mapped_column(Identity(), primary_key=True)
+    __tablename__ = "medicos"
+    __table_args__ = (UniqueConstraint("nombredeusuario", name="uq_medicos_usuario"),)
+
+    id: Mapped[int] = mapped_column("medicoid", Identity(always=True), primary_key=True)
     nombre: Mapped[str] = mapped_column(String(100))
-    apellidos: Mapped[str] = mapped_column(String(100))
-    especialidad: Mapped[str] = mapped_column(String(100))
-    direccion_consultorio: Mapped[str] = mapped_column(String(200))
-    correo: Mapped[str] = mapped_column(String(255), unique=True)
-    password_hash: Mapped[str] = mapped_column(String(255))  # nunca la contraseña en claro
-    fecha_registro: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    apellidos: Mapped[str] = mapped_column(String(150))
+    ciudad: Mapped[str] = mapped_column(String(100))
+    efirma: Mapped[str] = mapped_column(Text)
+    nombre_de_usuario: Mapped[str] = mapped_column("nombredeusuario", String(50))
+    # Hash (argon2), nunca la contraseña en claro
+    password: Mapped[str] = mapped_column(String(255))
+
+    citas: Mapped[list["Cita"]] = relationship(back_populates="medico")
+    consultas: Mapped[list["Consulta"]] = relationship(back_populates="medico")

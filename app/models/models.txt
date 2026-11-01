@@ -2,7 +2,18 @@ FUNCIONES Y METODOS: MODELS
 
 La carpeta models es nuestra capa de entidades de la base de datos. Cada archivo representa los campos de su respectiva tabla en la base de datos
 
-Tablas (Alembic crea el esquema: alembic upgrade head)
-- medico.py, paciente.py, consulta.py (+ tabla consulta_sintoma), prediccion.py (Prediccion y PrediccionDetalle)
-- enfermedad.py, sintoma.py, enfermedad_detalle.py: catalogo, con los nombres del diseno SQL (enfermedades, sintomas, enfermedadesdetalle)
+Esquema = docs/ScriptDb.sql (mismas tablas, columnas, restricciones e indices, con los mismos nombres).
+Alembic lo crea: alembic upgrade head (migracion 0003). La prueba tests/db/test_modelos_vs_script.py
+compara los modelos contra el script, asi que si uno cambia sin el otro, falla.
+
+- medico.py (medicos), paciente.py (pacientes), cita.py (citas), consulta.py (consultas)
+- enfermedad.py (enfermedades), sintoma.py (sintomas), enfermedad_detalle.py (enfermedadesdetalle): catalogo
 - __init__.py: importa todos los modelos para que Alembic los detecte
+
+Notas del diseno
+- consultas guarda el diagnostico que confirma el medico (enfermedadid), no la prediccion del modelo.
+  Las predicciones no se guardan en la BD: el endpoint /api/v1/ml/predecir no tiene estado.
+- Los nombres del catalogo estan en espanol (sintomas.nombresintoma, enfermedades.nombreenfermedad).
+  Las 99 enfermedades del modelo llevan en descripcion el codigo y texto CIE-10. El modelo conoce
+  los sintomas en ingles; el predictor traduce con app/ml/artifacts/symptoms_es.json.
+- Los modelos usan atributos en snake_case (nombre_de_usuario) que apuntan a las columnas del script (nombredeusuario)

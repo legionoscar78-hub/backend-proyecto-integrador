@@ -1,45 +1,54 @@
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import Column, DateTime, ForeignKey, Identity, String, Table, Text, func
+from sqlalchemy import (
+    CheckConstraint, DateTime, ForeignKey, Identity, Index, Numeric, SmallInteger, String, Text,
+    UniqueConstraint, func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
-# Síntomas capturados en cada consulta (reemplaza el texto libre `sintomas`)
-consulta_sintoma = Table(
-    "consulta_sintoma",
-    Base.metadata,
-    Column("consulta_id", ForeignKey("consulta.id", ondelete="CASCADE"), primary_key=True),
-    Column("sintoma_id", ForeignKey("sintomas.sintomaid", ondelete="RESTRICT"), primary_key=True),
-)
-
 
 class Consulta(Base):
-    __tablename__ = "consulta"
+    """Tabla consultas del diseño SQL (docs/ScriptDb.sql).
 
-    id: Mapped[int] = mapped_column(Identity(), primary_key=True)
-    paciente_id: Mapped[int] = mapped_column(
-        ForeignKey("paciente.id", ondelete="RESTRICT"), index=True
+    Guarda el diagnóstico que el médico confirmó (enfermedad_id), no lo que sugirió el modelo.
+    """
+
+    __tablename__ = "consultas"
+    __table_args__ = (
+        UniqueConstraint("llave", name="uq_consultas_llave"),
+        CheckConstraint("edad BETWEEN 0 AND 150", name="ck_consultas_edad"),
+        CheckConstraint("peso IS NULL OR peso > 0", name="ck_consultas_peso"),
+        CheckConstraint("altura IS NULL OR altura > 0", name="ck_consultas_altura"),
+        Index("ix_consultas_medico", "medicoid"),
+        Index("ix_consultas_paciente", "pacienteid"),
+        Index("ix_consultas_enfermedad", "enfermedadid"),
     )
+
+    id: Mapped[int] = mapped_column("consultaid", Identity(always=True), primary_key=True)
     medico_id: Mapped[int] = mapped_column(
-        ForeignKey("medico.id", ondelete="RESTRICT"), index=True
+        "medicoid",
+        ForeignKey("medicos.medicoid", name="fk_consultas_medico", onupdate="CASCADE", ondelete="RESTRICT"),
     )
-    # Datos del paciente en el momento de la consulta (la edad y el peso cambian)
-    paciente_peso: Mapped[float]
-    paciente_altura: Mapped[float]
-    paciente_edad: Mapped[int]
+    paciente_id: Mapped[int] = mapped_column(
+        "pacienteid",
+        ForeignKey("pacientes.pacienteid", name="fk_consultas_paciente", onupdate="CASCADE", ondelete="RESTRICT"),
+    )
+    enfermedad_id: Mapped[int] = mapped_column(
+        "enfermedadid",
+        ForeignKey("enfermedades.enfermedadid", name="fk_consultas_enfermedad", onupdate="CASCADE", ondelete="RESTRICT"),
+    )
+    edad: Mapped[int] = mapped_column(SmallInteger)  # edad del paciente el día de la consulta
+    peso: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))  # kg
+    altura: Mapped[Decimal | None] = mapped_column(Numeric(4, 2))  # metros
     fecha_consulta: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
+        "fechaconsulta", DateTime(), server_default=func.current_timestamp()
     )
-    motivo: Mapped[str] = mapped_column(String(500))
-    tratamiento: Mapped[str | None] = mapped_column(Text)
-    observaciones: Mapped[str | None] = mapped_column(Text)
-    # Diagnóstico confirmado por el médico; queda vacío hasta que lo decida
-    diagnostico_id: Mapped[int | None] = mapped_column(
-        ForeignKey("enfermedades.enfermedadid", ondelete="RESTRICT"), index=True
-    )
+    llave: Mapped[str] = mapped_column(String(100))
+    notas: Mapped[str | None] = mapped_column(Text)
 
+    medico: Mapped["Medico"] = relationship(back_populates="consultas")
     paciente: Mapped["Paciente"] = relationship(back_populates="consultas")
-    sintomas: Mapped[list["Sintoma"]] = relationship(secondary=consulta_sintoma)
-    diagnostico: Mapped["Enfermedad | None"] = relationship()
-    predicciones: Mapped[list["Prediccion"]] = relationship(back_populates="consulta")
+    enfermedad: Mapped["Enfermedad"] = relationship()

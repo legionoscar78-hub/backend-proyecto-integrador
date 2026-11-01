@@ -1,16 +1,14 @@
-from sqlalchemy import Identity, String
+from sqlalchemy import Identity, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
 
 
 class Sintoma(Base):
-    """Catálogo de síntomas. Los nombres de tabla y columna son los del diseño SQL."""
+    """Tabla sintomas del diseño SQL (docs/ScriptDb.sql)."""
 
     __tablename__ = "sintomas"
+    __table_args__ = (UniqueConstraint("nombresintoma", name="uq_sintomas_nombre"),)
 
-    id: Mapped[int] = mapped_column("sintomaid", Identity(), primary_key=True)
-    # Nombre en inglés: clave estable, igual a las columnas del dataset y a symptoms.json
-    nombre: Mapped[str] = mapped_column("nombresintoma", String(100), unique=True)
-    # Nombre para mostrar en la interfaz
-    nombre_es: Mapped[str | None] = mapped_column(String(150))
+    id: Mapped[int] = mapped_column("sintomaid", Identity(always=True), primary_key=True)
+    nombre: Mapped[str] = mapped_column("nombresintoma", String(150))
