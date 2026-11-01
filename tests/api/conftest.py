@@ -13,6 +13,7 @@ import app.models  # noqa: F401  registra todas las tablas
 from app.api.deps import get_db
 from app.api.v1.api import api_router
 from app.core.database import Base
+from app.models import Enfermedad, EnfermedadDetalle, Sintoma
 from datos import dias, paciente_json
 
 
@@ -30,6 +31,32 @@ class Api:
 
     def paciente(self, headers: dict, n: int = 0, **cambios) -> dict:
         r = self.cliente.post("/api/v1/pacientes", json=paciente_json(n, **cambios), headers=headers)
+        assert r.status_code == 201, r.text
+        return r.json()
+
+    def enfermedad(self, nombre: str = "gripe", descripcion: str | None = None) -> int:
+        """Inserta una enfermedad en el catálogo y devuelve su id."""
+        with self.Sesion() as db:
+            fila = Enfermedad(nombre=nombre, descripcion=descripcion)
+            db.add(fila)
+            db.commit()
+            return fila.id
+
+    def sintoma(self, nombre: str) -> int:
+        with self.Sesion() as db:
+            fila = Sintoma(nombre=nombre)
+            db.add(fila)
+            db.commit()
+            return fila.id
+
+    def asociar(self, enfermedad_id: int, sintoma_id: int) -> None:
+        with self.Sesion() as db:
+            db.add(EnfermedadDetalle(enfermedad_id=enfermedad_id, sintoma_id=sintoma_id))
+            db.commit()
+
+    def consulta(self, headers: dict, paciente_id: int, enfermedad_id: int, **extra) -> dict:
+        r = self.cliente.post("/api/v1/consultas", headers=headers,
+                              json={"paciente_id": paciente_id, "enfermedad_id": enfermedad_id, **extra})
         assert r.status_code == 201, r.text
         return r.json()
 

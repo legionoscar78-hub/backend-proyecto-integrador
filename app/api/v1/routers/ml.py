@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from dataclasses import asdict
 
-from app.api.deps import get_current_medico
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.api.deps import get_current_medico, get_db
 from app.models.medico import Medico
 from app.ml.features import SintomaDesconocido
 from app.ml.predictor import ModeloNoDisponible
@@ -21,10 +24,12 @@ router = APIRouter()  # /predecir exige sesión de médico; /estado es público
         503: {"description": "El modelo no está disponible"},
     },
 )
-def predecir(entrada: PrediccionEntrada, _: Medico = Depends(get_current_medico)) -> PrediccionSalida:
+def predecir(
+    entrada: PrediccionEntrada, _: Medico = Depends(get_current_medico), db: Session = Depends(get_db)
+) -> PrediccionSalida:
     """Enfermedades más probables para los síntomas dados, con su probabilidad estimada."""
     try:
-        resultado = prediccion_service.predecir(entrada.sintomas, entrada.top_n)
+        resultado = prediccion_service.predecir(db, entrada.sintomas, entrada.top_n)
     except ModeloNoDisponible as error:
         raise HTTPException(status_code=503, detail=str(error))
     except SintomaDesconocido as error:
@@ -34,7 +39,10 @@ def predecir(entrada: PrediccionEntrada, _: Medico = Depends(get_current_medico)
         )
     return PrediccionSalida(
         modelo_version=resultado.modelo_version,
-        sugerencias=[SugerenciaSalida.model_validate(s) for s in resultado.sugerencias],
+        sugerencias=[
+            SugerenciaSalida(**asdict(s), enfermedad_id=resultado.enfermedad_ids.get(s.enfermedad_es))
+            for s in resultado.sugerencias
+        ],
     )
 
 

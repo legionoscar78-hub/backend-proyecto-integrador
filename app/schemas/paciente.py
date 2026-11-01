@@ -6,6 +6,8 @@ from pydantic import (
     AfterValidator, BaseModel, ConfigDict, Field, StringConstraints, computed_field, model_validator,
 )
 
+from app.core.fechas import calcular_edad
+
 Sexo = Literal["H", "M"]
 TipoDeSangre = Literal["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
 
@@ -97,9 +99,7 @@ class PacienteSalida(BaseModel):
     @computed_field
     @property
     def edad(self) -> int:
-        hoy = date.today()
-        n = self.fecha_nacimiento
-        return hoy.year - n.year - ((hoy.month, hoy.day) < (n.month, n.day))
+        return calcular_edad(self.fecha_nacimiento)
 
 
 class PacienteResumen(BaseModel):

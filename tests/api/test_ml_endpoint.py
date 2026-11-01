@@ -1,4 +1,4 @@
-"""Pruebas del endpoint de predicción. Usan una app mínima: no necesitan base de datos ni .env."""
+"""Pruebas del endpoint de predicción. Usan una app mínima sobre SQLite en memoria (el catálogo de enfermedades)."""
 import pytest
 
 pytest.importorskip("torch")
@@ -6,16 +6,42 @@ pytest.importorskip("httpx")
 
 from fastapi import FastAPI  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy import create_engine  # noqa: E402
+from sqlalchemy.orm import sessionmaker  # noqa: E402
+from sqlalchemy.pool import StaticPool  # noqa: E402
 
-from app.api.deps import get_current_medico  # noqa: E402
+import app.models  # noqa: E402,F401
+from app.api.deps import get_current_medico, get_db  # noqa: E402
+from app.core.database import Base  # noqa: E402
+from app.models import Enfermedad  # noqa: E402
 from app.api.v1.api import api_router  # noqa: E402
 from app.ml import predictor as pred  # noqa: E402
 from juguete import HP, preparar_carpetas  # noqa: E402
 from ml_pipeline.training.train import cargar_datos, entrenar, guardar  # noqa: E402
 
+motor = create_engine("sqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False})
+Sesion = sessionmaker(bind=motor, autoflush=False)
+
+
+def _get_db_prueba():
+    db = Sesion()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@pytest.fixture(autouse=True)
+def catalogo_vacio():
+    """Cada prueba empieza con tablas vacías."""
+    Base.metadata.drop_all(motor)
+    Base.metadata.create_all(motor)
+
+
 app = FastAPI()
 app.include_router(api_router, prefix="/api/v1")
 app.dependency_overrides[get_current_medico] = lambda: object()  # un médico cualquiera con sesión
+app.dependency_overrides[get_db] = _get_db_prueba
 cliente = TestClient(app)  # sin "with": no ejecuta el lifespan de main.py
 
 # La misma app, pero sin saltarse la autenticación
@@ -54,7 +80,8 @@ def test_predecir_devuelve_sugerencias_y_aviso(con_modelo):
     assert cuerpo["modelo_version"].startswith("mlp-")
     assert [s["posicion"] for s in cuerpo["sugerencias"]] == [1, 2]
     assert cuerpo["sugerencias"][0]["enfermedad"] == "enfermedad 1"
-    assert set(cuerpo["sugerencias"][0]) == {"posicion", "enfermedad", "enfermedad_es", "cie10_codigo", "probabilidad"}
+    assert set(cuerpo["sugerencias"][0]) == {
+        "posicion", "enfermedad", "enfermedad_es", "cie10_codigo", "probabilidad", "enfermedad_id"}
     assert "no es un diagnóstico" in cuerpo["aviso"].lower()
 
 
@@ -112,3 +139,15 @@ def test_predecir_exige_sesion_de_medico(con_modelo):
 
 def test_estado_sigue_siendo_publico(con_modelo):
     assert cliente_sin_sesion.get("/api/v1/ml/estado").status_code == 200
+
+
+def test_cada_sugerencia_trae_el_id_de_la_enfermedad_en_el_catalogo(con_modelo):
+    # Las clases del modelo de juguete se llaman "enfermedad 0", "enfermedad 1", "enfermedad 2" (en español)
+    with Sesion() as db:
+        db.add_all([Enfermedad(nombre="enfermedad 1"), Enfermedad(nombre="otra")])
+        db.commit()
+        id_1 = db.query(Enfermedad).filter_by(nombre="enfermedad 1").one().id
+    r = cliente.post(URL, json={"sintomas": ["sintoma 3", "sintoma 4", "sintoma 5"], "top_n": 3})
+    ids = {s["enfermedad_es"]: s["enfermedad_id"] for s in r.json()["sugerencias"]}
+    assert ids["enfermedad 1"] == id_1
+    assert ids["enfermedad 0"] is None and ids["enfermedad 2"] is None  # no están cargadas en la BD

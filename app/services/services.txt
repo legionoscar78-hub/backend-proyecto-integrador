@@ -6,6 +6,9 @@ La carpeta services seria nuestra capa lógica o de negocio
   Al iniciar sesion actualiza el hash si los parametros de argon2 se endurecieron
 - paciente_service.py: crear, obtener, listar, actualizar, eliminar. Errores: PacienteNoEncontrado, CurpYaRegistrada, PacienteConRegistros
 - cita_service.py: agendar, obtener, listar, actualizar, cancelar. Errores: CitaNoEncontrada, HorarioOcupado, FechaEnElPasado
-- consulta_service.py: coordina síntomas, ia, guardar
-- prediccion_service.py: llama al predictor y arroja resultados (quita sintomas repetidos y ajusta top_n)
+- consulta_service.py: crear, obtener, listar, actualizar y obtener_por_llave. Llave de acceso: 16 caracteres al azar
+  (XXXX-XXXX-XXXX-XXXX, sin 0/O/1/I/L, ~79 bits); el paciente se la da a otro medico para que vea la consulta (solo lectura).
+  Acepta la llave en minusculas, con espacios o sin guiones. Errores: ConsultaNoEncontrada, EnfermedadNoEncontrada, LlaveInvalida
+- catalogo_service.py: enfermedades y sintomas del catalogo, marcando los que entiende el modelo
+- prediccion_service.py: llama al predictor y arroja resultados (quita sintomas repetidos, ajusta top_n y agrega el enfermedad_id del catalogo a cada sugerencia)
 - dashboard_service.py: lee lo generado

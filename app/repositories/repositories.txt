@@ -6,4 +6,6 @@ Solo consultas SQL/ORM; las reglas de negocio van en services.
 - medico_repo.py: obtener_por_id, obtener_por_usuario, agregar
 - paciente_repo.py: obtener, obtener_por_curp, listar (busqueda por palabras), tiene_citas_o_consultas, agregar, eliminar
 - cita_repo.py: todo filtrado por medico: obtener, horario_ocupado, listar, agregar, eliminar
-- consulta_repo.py: pendiente
+- consulta_repo.py: todo filtrado por medico salvo obtener_por_llave: obtener, obtener_por_llave, listar, agregar
+- enfermedad_repo.py, sintoma_repo.py: catalogo (listar con busqueda, ids_por_nombre)
+- busqueda.py: busqueda por palabras compartida (escapa los comodines de LIKE)

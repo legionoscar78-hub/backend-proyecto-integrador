@@ -15,7 +15,14 @@ La carpeta api es la capa presentación de nuestro proyecto en el caso del backe
 	- citas.py (implementado, /api/v1/citas): cada cita es del medico de la sesion; las de otros medicos devuelven 404
 		- POST agenda (hora sin segundos; 404 paciente inexistente, 409 horario ocupado, 422 fecha pasada)
 		- GET lista con ?desde=&hasta=&paciente_id=&limit=&offset=, GET /{id}, PATCH /{id} (reprogramar o cambiar paciente), DELETE /{id}
-	- consultas.py: operaciones relacionadas con capturar consultas
+	- consultas.py (implementado, /api/v1/consultas): una consulta guarda el diagnostico que confirma el medico
+		- POST registra (la edad se calcula con la fecha de nacimiento; se genera la llave de acceso). GET lista las PROPIAS
+		  con filtros paciente_id, enfermedad_id, desde, hasta. GET /{id} y PATCH /{id} (corregir diagnostico, peso, altura, notas): solo el autor
+		- POST /acceso {llave}: abre en solo lectura la consulta de otro medico con la llave que le da el paciente. 404 si no coincide
+		- no hay DELETE: son parte del expediente
+	- catalogo.py (implementado, /api/v1/catalogo): GET /enfermedades (con su id para enfermedad_id), GET /enfermedades/{id} (con sus sintomas)
+	  y GET /sintomas (?solo_modelo=true: solo los que entiende el modelo). Sus nombres son los que acepta /ml/predecir
+	- consultas.py (nota): operaciones relacionadas con capturar consultas
 	- historial.py: historial de consultas realizadas
 	- dashboard.py: retorno de datos específicos consultados
 	- ml.py (implementado, prefijo /api/v1/ml):

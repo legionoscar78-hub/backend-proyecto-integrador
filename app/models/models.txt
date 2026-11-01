@@ -11,6 +11,8 @@ compara los modelos contra el script, asi que si uno cambia sin el otro, falla.
 - __init__.py: importa todos los modelos para que Alembic los detecte
 
 Notas del diseno
+- consultas.llave es la clave de acceso: las consultas estan ocultas a los demas medicos, pero si el paciente le da la llave a
+  otro medico, este puede abrirla (solo lectura). La genera el servidor al azar (ver consulta_service.py)
 - consultas guarda el diagnostico que confirma el medico (enfermedadid), no la prediccion del modelo.
   Las predicciones no se guardan en la BD: el endpoint /api/v1/ml/predecir no tiene estado.
 - Los nombres del catalogo estan en espanol (sintomas.nombresintoma, enfermedades.nombreenfermedad).

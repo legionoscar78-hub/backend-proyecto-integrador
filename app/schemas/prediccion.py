@@ -29,6 +29,9 @@ class SugerenciaSalida(BaseModel):
     enfermedad_es: str
     cie10_codigo: str
     probabilidad: float = Field(ge=0, le=1)
+    enfermedad_id: int | None = Field(
+        default=None, description="Id en el catálogo (enfermedades.enfermedadid); null si no está cargada en la BD"
+    )
 
 
 class PrediccionSalida(BaseModel):

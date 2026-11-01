@@ -51,6 +51,7 @@ class Predictor:
         self.metadata = metadata
         # La BD guarda los síntomas en español y el modelo los conoce en inglés: nombre
         # normalizado en español -> clave en inglés. Sin symptoms_es.json solo vale el inglés.
+        self._nombres_es = nombres_es
         self._alias = {normalizar_texto(es): en for en, es in (nombres_es or {}).items()}
 
     @classmethod
@@ -71,6 +72,11 @@ class Predictor:
     @property
     def n_clases(self) -> int:
         return len(self._clases)
+
+    @property
+    def nombres_para_mostrar(self) -> list[str]:
+        """Nombres de los síntomas del modelo como los guarda la BD (español); en inglés si no hay symptoms_es.json."""
+        return list(self._nombres_es.values()) if self._nombres_es else list(self._vocabulario)
 
     @property
     def vocabulario(self) -> list[str]:
