@@ -1,12 +1,13 @@
 """ETL de punta a punta con el dataset real. Se omite si DiseaseAndSymptoms.csv no está en raw/
 (el CSV no se versiona en git). Tarda ~30 s porque lee 190 MB."""
 import copy
+import json
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from app.ml.features import cargar_vocabulario, vectorizar_sintomas
+from app.ml.features import cargar_vocabulario, normalizar_texto, vectorizar_sintomas
 from ml_pipeline.config import cargar_config, ruta
 from ml_pipeline.etl.run_etl import ejecutar
 from ml_pipeline.etl.transform import COL_CLASE, COL_SPLIT
@@ -45,6 +46,13 @@ def test_el_vocabulario_es_el_de_sintomas_csv_en_su_orden(corrida):
 def test_symptoms_json_se_escribe_y_se_puede_cargar(corrida):
     resultado, base = corrida
     assert cargar_vocabulario(base / "artifacts" / "symptoms.json") == resultado.vocabulario
+
+
+def test_symptoms_es_json_tiene_un_nombre_por_sintoma_del_vocabulario(corrida):
+    resultado, base = corrida
+    es = json.loads((base / "artifacts" / "symptoms_es.json").read_text(encoding="utf-8"))
+    assert list(es) == resultado.vocabulario
+    assert len(set(map(normalizar_texto, es.values()))) == len(es)
 
 
 def test_el_parquet_conserva_los_datos(corrida):

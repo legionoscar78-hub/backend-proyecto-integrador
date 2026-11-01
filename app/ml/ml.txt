@@ -15,7 +15,11 @@ Capa extra para el manejo del modelo de IA
 - artifacts/: carpeta del modelo entrenado y lista de sintomas, lo que produce el entrenamiento
 	- model.pt
 	- symptoms.json: vocabulario ordenado de sintomas (lo escribe el ETL)
+	- symptoms_es.json: ingles -> espanol de cada sintoma del vocabulario (lo escribe el ETL). Permite que el
+	  predictor acepte los nombres en espanol que guarda la BD (sintomas.nombresintoma)
 	- metadata.json: version, fecha, metricas, clases
 
-Las claves de los sintomas y las enfermedades son los nombres en ingles (sintomas.nombresintoma y
-enfermedades.descripcion en la BD). El espanol (nombre_es, descripcion_es) es solo para mostrar.
+Para el modelo, los sintomas y las enfermedades se identifican por su nombre en ingles (columnas del dataset,
+symptoms.json, clases de metadata.json). La BD guarda los nombres en espanol (docs/ScriptDb.sql): el predictor
+traduce los sintomas con symptoms_es.json y devuelve cada enfermedad con su nombre en espanol y su codigo CIE-10
+(metadata.json), que coincide con enfermedades.nombreenfermedad.

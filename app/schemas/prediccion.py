@@ -8,15 +8,15 @@ AVISO = (
     "sustituye el criterio del médico."
 )
 
-NombreSintoma = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
+NombreSintoma = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=150)]
 
 
 class PrediccionEntrada(BaseModel):
     sintomas: list[NombreSintoma] = Field(
         min_length=1,
         max_length=MAX_SINTOMAS,
-        description="Nombres de los síntomas, en inglés tal como están en el catálogo (sintomas.nombresintoma).",
-        examples=[["headache", "nausea"]],
+        description="Nombres de los síntomas como están en el catálogo (sintomas.nombresintoma, en español). También se aceptan en inglés.",
+        examples=[["dolor de cabeza", "náusea"]],
     )
     top_n: int = Field(default=5, ge=1, le=10, description="Cuántas enfermedades devolver.")
 

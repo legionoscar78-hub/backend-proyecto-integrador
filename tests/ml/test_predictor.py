@@ -123,3 +123,52 @@ def test_cargar_falla_si_los_artefactos_no_cuadran(artefactos, tmp_path):
     (copia / "metadata.json").write_text(json.dumps(meta), encoding="utf-8")
     with pytest.raises(ErrorDeArtefactos, match="clases"):
         pred.Predictor.cargar(copia)
+
+
+# ---------------------------------------------------------------- nombres en español
+
+@pytest.fixture
+def artefactos_con_es(artefactos, tmp_path):
+    """Copia de los artefactos de juguete con symptoms_es.json (el síntoma i se llama 'síntoma i' en español)."""
+    copia = tmp_path / "con_es"
+    shutil.copytree(artefactos, copia)
+    vocabulario = json.loads((copia / "symptoms.json").read_text(encoding="utf-8"))
+    nombres = {en: en.replace("sintoma", "Dolor número") for en in vocabulario}
+    (copia / "symptoms_es.json").write_text(json.dumps(nombres, ensure_ascii=False), encoding="utf-8")
+    return copia
+
+
+def test_acepta_nombres_en_espanol_igual_que_en_ingles(artefactos_con_es):
+    p = pred.Predictor.cargar(artefactos_con_es)
+    en = p.predecir(CLASE1, top_n=3)
+    es = p.predecir(["dolor numero 3", "DOLOR NÚMERO 4", "Dolor número 5"], top_n=3)  # sin acentos, con ellos, en mayúsculas
+    assert es == en
+
+
+def test_acepta_mezclar_idiomas(artefactos_con_es):
+    p = pred.Predictor.cargar(artefactos_con_es)
+    assert p.predecir(["Dolor número 6", "sintoma 7", "Dolor número 8"], top_n=3) == p.predecir(CLASE2, top_n=3)
+
+
+def test_nombre_desconocido_se_informa_tal_como_llego(artefactos_con_es):
+    p = pred.Predictor.cargar(artefactos_con_es)
+    with pytest.raises(SintomaDesconocido) as error:
+        p.predecir(["Dolor número 3", "Dolor raro"], top_n=1)
+    assert error.value.sintomas == ["Dolor raro"]
+
+
+def test_sin_symptoms_es_json_solo_se_aceptan_nombres_en_ingles(artefactos):
+    with pytest.raises(SintomaDesconocido):
+        pred.Predictor.cargar(artefactos).predecir(["Dolor número 3"], top_n=1)
+
+
+def test_symptoms_es_json_que_no_cuadra_con_el_vocabulario(artefactos_con_es):
+    (artefactos_con_es / "symptoms_es.json").write_text(json.dumps({"sintoma 0": "x"}), encoding="utf-8")
+    with pytest.raises(ErrorDeArtefactos, match="symptoms_es.json"):
+        pred.Predictor.cargar(artefactos_con_es)
+
+
+def test_symptoms_es_json_corrupto(artefactos_con_es):
+    (artefactos_con_es / "symptoms_es.json").write_text("{no es json", encoding="utf-8")
+    with pytest.raises(ErrorDeArtefactos, match="symptoms_es.json"):
+        pred.Predictor.cargar(artefactos_con_es)

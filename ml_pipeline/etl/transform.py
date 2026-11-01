@@ -27,12 +27,34 @@ class Resultado:
     vocabulario: list[str]   # -> symptoms.json
     clases: list[dict]       # índice de clase -> enfermedad y código CIE-10
     reporte: dict
+    nombres_es: dict[str, str]  # síntoma del vocabulario (inglés) -> nombre en español -> symptoms_es.json
 
 
 def _lista(valores, maximo=8) -> str:
     valores = sorted(valores)
     extra = f" (+{len(valores) - maximo} más)" if len(valores) > maximo else ""
     return ", ".join(valores[:maximo]) + extra
+
+
+def _nombres_es(sv: pd.DataFrame, vocabulario: list[str]) -> dict[str, str]:
+    """Nombre en español de cada síntoma del vocabulario.
+
+    El predictor acepta ambos idiomas (la BD guarda el español), así que ningún nombre en español
+    puede repetirse ni coincidir con la clave en inglés de OTRO síntoma: sería ambiguo.
+    """
+    if "nombre_es" not in sv.columns:
+        raise ErrorDeDatos("sintomas.csv no tiene la columna 'nombre_es'")
+    es = dict(zip(sv["nombre_en"], sv["nombre_es"]))
+    nombres = {v: es[v] for v in vocabulario}
+    if any(not isinstance(n, str) or not n.strip() for n in nombres.values()):
+        raise ErrorDeDatos("Hay síntomas del vocabulario sin nombre en español en sintomas.csv")
+    normalizados = {v: normalizar_texto(n) for v, n in nombres.items()}
+    if len(set(normalizados.values())) != len(normalizados):
+        raise ErrorDeDatos("Hay nombres en español repetidos en sintomas.csv")
+    choques = [v for v, n in normalizados.items() if n != v and n in set(vocabulario)]
+    if choques:
+        raise ErrorDeDatos(f"Nombres en español que coinciden con la clave en inglés de otro síntoma: {_lista(choques)}")
+    return nombres
 
 
 def normalizar_dataset(df: pd.DataFrame) -> pd.DataFrame:
@@ -123,6 +145,7 @@ def transformar(
             f"(se perderían del modelo): {_lista(perdidos)}"
         )
     sin_casos = sorted(set(vocabulario) - con_casos)
+    nombres_es = _nombres_es(sv, vocabulario)
 
     # --- clases, en orden de código CIE-10
     indice_clase = {e: i for i, e in enumerate(lm["enfermedad_en"])}
@@ -149,4 +172,4 @@ def transformar(
         "casos_por_enfermedad": {"min": int(por_clase.min()), "max": int(por_clase.max())},
         "filas_por_split": {k: int(v) for k, v in datos[COL_SPLIT].value_counts().items()},
     }
-    return Resultado(datos=datos, vocabulario=vocabulario, clases=clases, reporte=reporte)
+    return Resultado(datos=datos, vocabulario=vocabulario, clases=clases, reporte=reporte, nombres_es=nombres_es)

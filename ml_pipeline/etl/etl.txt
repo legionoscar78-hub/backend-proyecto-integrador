@@ -7,8 +7,8 @@ Se ejecuta desde backend/ con: python -m ml_pipeline.etl.run_etl
 - transform.py: funciones puras. Normaliza nombres, filtra a las enfermedades de label_map.csv,
   quita duplicados exactos, valida el vocabulario, asigna clases (orden de codigo CIE-10) y
   divide en train/val/test (70/15/15, estratificado por clase, con la semilla de config.yaml)
-- load.py: escribe en data/processed/ (dataset.parquet, classes.json, etl_report.json) y el
-  vocabulario en app/ml/artifacts/symptoms.json
+- load.py: escribe en data/processed/ (dataset.parquet, classes.json, etl_report.json) y en
+  app/ml/artifacts/ el vocabulario (symptoms.json) y su traduccion (symptoms_es.json)
 - run_etl.py: punto de entrada al etl
 
 El ETL se detiene con un mensaje claro si los datos o los catalogos no coinciden (por ejemplo, un

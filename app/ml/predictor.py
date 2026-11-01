@@ -7,6 +7,7 @@ Uso desde la API:
 El vector de entrada se construye con vectorizar_sintomas(), la misma función que usó el
 entrenamiento, así que el orden de los síntomas es el de symptoms.json.
 """
+import json
 import logging
 import threading
 from collections.abc import Sequence
@@ -15,7 +16,7 @@ from pathlib import Path
 
 import torch
 
-from app.ml.features import cargar_vocabulario, vectorizar_sintomas
+from app.ml.features import cargar_vocabulario, normalizar_texto, vectorizar_sintomas
 from app.ml.model import ErrorDeArtefactos, cargar_modelo
 
 log = logging.getLogger(__name__)
@@ -42,11 +43,15 @@ class Sugerencia:
 
 
 class Predictor:
-    def __init__(self, modelo: torch.nn.Module, metadata: dict, vocabulario: list[str]):
+    def __init__(self, modelo: torch.nn.Module, metadata: dict, vocabulario: list[str],
+                 nombres_es: dict[str, str] | None = None):
         self._modelo = modelo
         self._vocabulario = vocabulario
         self._clases = metadata["clases"]
         self.metadata = metadata
+        # La BD guarda los síntomas en español y el modelo los conoce en inglés: nombre
+        # normalizado en español -> clave en inglés. Sin symptoms_es.json solo vale el inglés.
+        self._alias = {normalizar_texto(es): en for en, es in (nombres_es or {}).items()}
 
     @classmethod
     def cargar(cls, artifacts: Path = ARTIFACTS) -> "Predictor":
@@ -57,7 +62,7 @@ class Predictor:
             raise ErrorDeArtefactos("symptoms.json y el modelo tienen distinto número de síntomas")
         if len(metadata["clases"]) != metadata["arquitectura"]["n_clases"]:
             raise ErrorDeArtefactos("metadata.json tiene un número de clases distinto al del modelo")
-        return cls(modelo, metadata, vocabulario)
+        return cls(modelo, metadata, vocabulario, _cargar_nombres_es(artifacts / "symptoms_es.json", vocabulario))
 
     @property
     def version(self) -> str:
@@ -74,15 +79,17 @@ class Predictor:
     def predecir(self, sintomas: Sequence[str], top_n: int = TOP_N_POR_DEFECTO) -> list[Sugerencia]:
         """Las top_n enfermedades más probables, de mayor a menor probabilidad.
 
-        Lanza SinSintomas si la lista está vacía y SintomaDesconocido (de features.py) si algún
-        síntoma no está en el vocabulario del modelo. El orden y las repeticiones no importan.
+        Los síntomas pueden venir en español (como en la BD) o en inglés. Lanza SinSintomas si la
+        lista está vacía y SintomaDesconocido (de features.py) si algún síntoma no está en el
+        vocabulario del modelo. El orden y las repeticiones no importan.
         """
         if not 1 <= top_n <= len(self._clases):
             raise ValueError(f"top_n debe estar entre 1 y {len(self._clases)}")
         if not sintomas:
             raise SinSintomas("Se necesita al menos un síntoma")
 
-        vector = torch.tensor([vectorizar_sintomas(sintomas, self._vocabulario)], dtype=torch.float32)
+        claves = [self._alias.get(normalizar_texto(s), s) for s in sintomas]
+        vector = torch.tensor([vectorizar_sintomas(claves, self._vocabulario)], dtype=torch.float32)
         with torch.inference_mode():
             probabilidades = torch.softmax(self._modelo(vector), dim=1)[0]
             valores, indices = probabilidades.topk(top_n)
@@ -96,6 +103,19 @@ class Predictor:
             )
             for posicion, (i, p) in enumerate(zip(indices.tolist(), valores.tolist()), start=1)
         ]
+
+
+def _cargar_nombres_es(ruta: Path, vocabulario: list[str]) -> dict[str, str] | None:
+    """symptoms_es.json (inglés -> español), o None si no existe. Lanza ErrorDeArtefactos si no cuadra."""
+    if not ruta.is_file():
+        return None
+    try:
+        nombres = json.loads(ruta.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise ErrorDeArtefactos(f"symptoms_es.json no es un JSON válido: {error}") from error
+    if not isinstance(nombres, dict) or set(nombres) != set(vocabulario):
+        raise ErrorDeArtefactos("symptoms_es.json no corresponde al vocabulario del modelo. Vuelve a ejecutar el ETL.")
+    return nombres
 
 
 # --- Instancia única de la aplicación -------------------------------------------------------

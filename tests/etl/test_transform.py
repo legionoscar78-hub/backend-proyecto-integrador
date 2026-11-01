@@ -45,6 +45,7 @@ def sintomas():
     return pd.DataFrame({
         "orden": range(6),
         "nombre_en": COLUMNAS,
+        "nombre_es": ["fiebre", "tos", "dolor de garganta", "sarpullido", "dolor de cabeza", "náusea"],
         "usado_en_modelo": [1, 1, 1, 1, 1, 0],
     })
 
@@ -144,3 +145,26 @@ def test_falla_con_codigos_cie10_repetidos(label_map, sintomas):
     label_map.loc[1, "cie10_codigo"] = "J11"
     with pytest.raises(ErrorDeDatos, match="repetidos"):
         transformar(_dataset(), label_map, sintomas, **PARAMS)
+
+
+def test_nombres_es_cubre_el_vocabulario_en_su_orden(resultado):
+    assert list(resultado.nombres_es) == resultado.vocabulario
+    assert resultado.nombres_es["sore throat"] == "dolor de garganta"
+    assert "nausea" not in resultado.nombres_es  # fuera del modelo
+
+
+def test_falla_si_dos_sintomas_tienen_el_mismo_nombre_en_espanol(label_map, sintomas):
+    sintomas.loc[1, "nombre_es"] = "Fiebre"  # igual que el de fever tras normalizar
+    with pytest.raises(ErrorDeDatos, match="repetidos"):
+        transformar(_dataset(), label_map, sintomas, **PARAMS)
+
+
+def test_falla_si_un_nombre_en_espanol_coincide_con_la_clave_de_otro_sintoma(label_map, sintomas):
+    sintomas.loc[0, "nombre_es"] = "cough"  # es la clave en ingles de otro sintoma
+    with pytest.raises(ErrorDeDatos, match="coinciden"):
+        transformar(_dataset(), label_map, sintomas, **PARAMS)
+
+
+def test_falla_si_falta_la_columna_nombre_es(label_map, sintomas):
+    with pytest.raises(ErrorDeDatos, match="nombre_es"):
+        transformar(_dataset(), label_map, sintomas.drop(columns="nombre_es"), **PARAMS)

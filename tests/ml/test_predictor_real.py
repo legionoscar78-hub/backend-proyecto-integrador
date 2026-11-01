@@ -1,4 +1,6 @@
 """El predictor con el modelo real. Se omite si falta model.pt (está en .gitignore) o el dataset."""
+import json
+
 import numpy as np
 import pytest
 
@@ -61,3 +63,10 @@ def test_probabilidades_validas(predictor):
     sugerencias = predictor.predecir([predictor.vocabulario[0]], top_n=10)
     probs = [s.probabilidad for s in sugerencias]
     assert probs == sorted(probs, reverse=True) and 0 < sum(probs) <= 1.0 + 1e-9
+
+
+def test_acepta_los_nombres_en_espanol_de_la_bd(predictor):
+    """Lo que el médico elige en pantalla (sintomas.nombresintoma, en español) da lo mismo que la clave en inglés."""
+    es = json.loads((ARTIFACTS / "symptoms_es.json").read_text(encoding="utf-8"))
+    en = [s for s in predictor.vocabulario[:4]]
+    assert predictor.predecir([es[s] for s in en], top_n=5) == predictor.predecir(en, top_n=5)
