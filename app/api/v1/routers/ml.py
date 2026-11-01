@@ -1,5 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.api.deps import get_current_medico
+from app.models.medico import Medico
 from app.ml.features import SintomaDesconocido
 from app.ml.predictor import ModeloNoDisponible
 from app.schemas.prediccion import (
@@ -7,20 +9,20 @@ from app.schemas.prediccion import (
 )
 from app.services import prediccion_service
 
-router = APIRouter()
+router = APIRouter()  # /predecir exige sesión de médico; /estado es público
 
 
 @router.post(
     "/predecir",
     response_model=PrediccionSalida,
     responses={
+        401: {"description": "Falta el token de sesión o no es válido"},
         422: {"description": "Algún síntoma no está en el vocabulario del modelo"},
         503: {"description": "El modelo no está disponible"},
     },
 )
-def predecir(entrada: PrediccionEntrada) -> PrediccionSalida:
+def predecir(entrada: PrediccionEntrada, _: Medico = Depends(get_current_medico)) -> PrediccionSalida:
     """Enfermedades más probables para los síntomas dados, con su probabilidad estimada."""
-    # TODO: exigir sesión de médico cuando exista auth (Depends de usuario actual)
     try:
         resultado = prediccion_service.predecir(entrada.sintomas, entrada.top_n)
     except ModeloNoDisponible as error:

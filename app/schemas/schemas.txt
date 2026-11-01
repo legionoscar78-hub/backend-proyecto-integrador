@@ -1,6 +1,7 @@
 FUNCIONES Y METODOS: SCHEMAS
 
-Contratos de entrada y salida
+Contratos de entrada y salida, consulta informacion de la base de datos y relaciona el historial de consultas con el mismo paciente
 
+- auth.py: RegistroEntrada, LoginEntrada, TokenSalida y MedicoSalida (nunca incluye password ni efirma)
 - prediccion.py: entrada (sintomas + top_n) y salida (lista de enfermedades con probabilidad, version del modelo
   y un aviso de que el resultado es orientativo)

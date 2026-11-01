@@ -2,7 +2,8 @@ FUNCIONES Y METODOS: SERVICES
 
 La carpeta services seria nuestra capa lógica o de negocio
 
-- auth_service.py: servicio de inicio de sesión
+- auth_service.py: registrar() e iniciar_sesion(). Errores del dominio: UsuarioYaExiste, CredencialesInvalidas.
+  Al iniciar sesion actualiza el hash si los parametros de argon2 se endurecieron
 - paciente_service.py: servicio de operaciones de pacientes
 - consulta_service.py: coordina síntomas, ia, guardar
 - prediccion_service.py: llama al predictor y arroja resultados (quita sintomas repetidos y ajusta top_n)

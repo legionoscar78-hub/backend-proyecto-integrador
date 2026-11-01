@@ -1,3 +1,7 @@
-FUNCIONES Y METODOS: SERVICES
+FUNCIONES Y METODOS: REPOSITORIES
 
-La carpeta repositories es nuestra capa de acceso de datos, cada carpeta representa las operaciones de cada entidad
+La carpeta repositories es nuestra capa de acceso de datos, cada archivo representa las operaciones de cada entidad.
+Solo consultas SQL/ORM; las reglas de negocio van en services.
+
+- medico_repo.py: obtener_por_id, obtener_por_usuario, agregar
+- paciente_repo.py, consulta_repo.py: pendientes

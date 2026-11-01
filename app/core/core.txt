@@ -2,6 +2,8 @@ FUNCIONES Y METODOS: CORE
 
 La carpeta core, es la capa transversal del proyecto
 
-- config.py: variables de entorno (BD)
+- config.py: variables de entorno (.env): BD, JWT_SECRET (obligatoria, minimo 32 caracteres) y ACCESS_TOKEN_MINUTES
 - database.py: motor y sesión de postresql
-- security.py: login y hash de contraseña
+- security.py: contrasenas con argon2 (hashear_password, verificar_password, necesita_rehash) y tokens JWT
+  HS256 (crear_token, leer_token). Los tokens llevan sub, iss, iat y exp; se rechazan los que no esten
+  firmados con nuestra clave, expiren, no traigan los cuatro claims o declaren otro algoritmo

@@ -2,9 +2,12 @@ FUNCIONES Y METODOS: API
 
 La carpeta api es la capa presentación de nuestro proyecto en el caso del backend, esta expone los datos a la web
 
-- deps.py: dependencias, sesión y usuario actual
+- deps.py: get_db y get_current_medico (exige Authorization: Bearer <token>; 401 si falta, es invalido o expiro)
 - routers/
-	- auth.py: inicio de sesión
+	- auth.py (implementado, prefijo /api/v1/auth):
+		- POST /registro: crea la cuenta de un medico (usuario en minusculas, contrasena 8-128 caracteres). 409 si el usuario existe
+		- POST /login: {nombre_de_usuario, password} -> token de sesion. 401 con el mismo mensaje si falla el usuario o la clave
+		- GET /me: perfil del medico de la sesion (sin password ni efirma)
 	- pacientes.py: operaciones crud pacientes
 	- consultas.py: operaciones relacionadas con capturar consultas
 	- historial.py: historial de consultas realizadas
@@ -13,7 +16,7 @@ La carpeta api es la capa presentación de nuestro proyecto en el caso del backe
 		- POST /predecir: {sintomas: [...], top_n} -> enfermedades probables con probabilidad. 422 si un
 		  sintoma no esta en el vocabulario del modelo, 503 si el modelo no esta cargado
 		- GET /estado: si hay modelo cargado, su version y sus metricas de test
-		- pendiente: exigir sesion de medico cuando exista auth
+		- /predecir exige sesion de medico; /estado es publico
 
 
 

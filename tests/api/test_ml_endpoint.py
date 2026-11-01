@@ -7,6 +7,7 @@ pytest.importorskip("httpx")
 from fastapi import FastAPI  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
+from app.api.deps import get_current_medico  # noqa: E402
 from app.api.v1.api import api_router  # noqa: E402
 from app.ml import predictor as pred  # noqa: E402
 from juguete import HP, preparar_carpetas  # noqa: E402
@@ -14,7 +15,13 @@ from ml_pipeline.training.train import cargar_datos, entrenar, guardar  # noqa: 
 
 app = FastAPI()
 app.include_router(api_router, prefix="/api/v1")
+app.dependency_overrides[get_current_medico] = lambda: object()  # un médico cualquiera con sesión
 cliente = TestClient(app)  # sin "with": no ejecuta el lifespan de main.py
+
+# La misma app, pero sin saltarse la autenticación
+app_real = FastAPI()
+app_real.include_router(api_router, prefix="/api/v1")
+cliente_sin_sesion = TestClient(app_real)
 
 URL = "/api/v1/ml/predecir"
 
@@ -94,3 +101,14 @@ def test_estado_con_y_sin_modelo(con_modelo, monkeypatch):
     monkeypatch.setattr(pred, "_error", "no hay")
     r = cliente.get("/api/v1/ml/estado")
     assert r.status_code == 200 and r.json()["disponible"] is False and r.json()["error"] == "no hay"
+
+
+def test_predecir_exige_sesion_de_medico(con_modelo):
+    r = cliente_sin_sesion.post(URL, json={"sintomas": ["sintoma 0"]})
+    assert r.status_code == 401 and r.headers["www-authenticate"] == "Bearer"
+    assert cliente_sin_sesion.post(URL, json={"sintomas": ["sintoma 0"]},
+                                   headers={"Authorization": "Bearer basura"}).status_code == 401
+
+
+def test_estado_sigue_siendo_publico(con_modelo):
+    assert cliente_sin_sesion.get("/api/v1/ml/estado").status_code == 200
