@@ -8,7 +8,13 @@ La carpeta api es la capa presentación de nuestro proyecto en el caso del backe
 		- POST /registro: crea la cuenta de un medico (usuario en minusculas, contrasena 8-128 caracteres). 409 si el usuario existe
 		- POST /login: {nombre_de_usuario, password} -> token de sesion. 401 con el mismo mensaje si falla el usuario o la clave
 		- GET /me: perfil del medico de la sesion (sin password ni efirma)
-	- pacientes.py: operaciones crud pacientes
+	- pacientes.py (implementado, /api/v1/pacientes, todo con sesion de medico):
+		- POST: crea (CURP unica, formato validado; 409 si existe). GET: lista paginada con ?buscar=&limit=&offset=
+		- GET /{id}, PATCH /{id} (parcial; null borra telefono, tipo de sangre y notas), DELETE /{id} (409 si tiene citas o consultas)
+		- el directorio es compartido entre medicos: el esquema no liga pacientes con medicos
+	- citas.py (implementado, /api/v1/citas): cada cita es del medico de la sesion; las de otros medicos devuelven 404
+		- POST agenda (hora sin segundos; 404 paciente inexistente, 409 horario ocupado, 422 fecha pasada)
+		- GET lista con ?desde=&hasta=&paciente_id=&limit=&offset=, GET /{id}, PATCH /{id} (reprogramar o cambiar paciente), DELETE /{id}
 	- consultas.py: operaciones relacionadas con capturar consultas
 	- historial.py: historial de consultas realizadas
 	- dashboard.py: retorno de datos específicos consultados

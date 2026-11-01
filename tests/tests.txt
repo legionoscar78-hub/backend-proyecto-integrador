@@ -1,0 +1,17 @@
+PRUEBAS
+
+Desde backend/:  python -m pytest
+
+- tests/etl, tests/ml, tests/training: ETL, features, entrenamiento, evaluacion y predictor (algunas usan el
+  dataset real y el modelo entrenado; se omiten si faltan)
+- tests/db: los modelos SQLAlchemy contra docs/ScriptDb.sql (sin base de datos)
+- tests/core, tests/api: seguridad, auth, pacientes, citas y endpoint de prediccion
+- tests/utils: datos y ayudantes compartidos (pythonpath en pytest.ini)
+- tests/conftest.py: variables de entorno de prueba (JWT_SECRET fija); no se conecta a tu base de datos
+
+Las pruebas de tests/api corren por defecto sobre SQLite en memoria. Para correrlas contra PostgreSQL:
+crea una base cuyo nombre contenga "test" (por ejemplo mediapoyo_test) y ejecuta
+
+    TEST_DATABASE_URL=postgresql+psycopg://usuario:clave@localhost:5432/mediapoyo_test python -m pytest tests/api
+
+OJO: en cada prueba se vacian TODAS las tablas de esa base. Si el nombre no contiene "test", pytest se detiene.

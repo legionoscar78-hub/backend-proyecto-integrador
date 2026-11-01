@@ -4,7 +4,8 @@ La carpeta services seria nuestra capa lógica o de negocio
 
 - auth_service.py: registrar() e iniciar_sesion(). Errores del dominio: UsuarioYaExiste, CredencialesInvalidas.
   Al iniciar sesion actualiza el hash si los parametros de argon2 se endurecieron
-- paciente_service.py: servicio de operaciones de pacientes
+- paciente_service.py: crear, obtener, listar, actualizar, eliminar. Errores: PacienteNoEncontrado, CurpYaRegistrada, PacienteConRegistros
+- cita_service.py: agendar, obtener, listar, actualizar, cancelar. Errores: CitaNoEncontrada, HorarioOcupado, FechaEnElPasado
 - consulta_service.py: coordina síntomas, ia, guardar
 - prediccion_service.py: llama al predictor y arroja resultados (quita sintomas repetidos y ajusta top_n)
 - dashboard_service.py: lee lo generado

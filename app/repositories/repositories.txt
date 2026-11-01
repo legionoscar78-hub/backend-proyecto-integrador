@@ -4,4 +4,6 @@ La carpeta repositories es nuestra capa de acceso de datos, cada archivo represe
 Solo consultas SQL/ORM; las reglas de negocio van en services.
 
 - medico_repo.py: obtener_por_id, obtener_por_usuario, agregar
-- paciente_repo.py, consulta_repo.py: pendientes
+- paciente_repo.py: obtener, obtener_por_curp, listar (busqueda por palabras), tiene_citas_o_consultas, agregar, eliminar
+- cita_repo.py: todo filtrado por medico: obtener, horario_ocupado, listar, agregar, eliminar
+- consulta_repo.py: pendiente
