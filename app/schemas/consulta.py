@@ -23,7 +23,7 @@ class ConsultaCrear(BaseModel):
 
 class AccesoPorLlave(BaseModel):
     llave: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)] = Field(
-        description="Llave que el paciente recibió al hacerse la consulta", examples=["K7QM-2XW9-HP4T-R8ZD"]
+        description="Llave que el paciente recibió al hacerse la consulta", examples=["K7QM-2XW9"]
     )
 
 

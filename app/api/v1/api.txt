@@ -7,6 +7,8 @@ La carpeta api es la capa presentación de nuestro proyecto en el caso del backe
 	- auth.py (implementado, prefijo /api/v1/auth):
 		- POST /registro: crea la cuenta de un medico (usuario en minusculas, contrasena 8-128 caracteres). 409 si el usuario existe
 		- POST /login: {nombre_de_usuario, password} -> token de sesion. 401 con el mismo mensaje si falla el usuario o la clave
+		  Limite de intentos: 5 fallos por usuario+IP (o 20 por IP) cada 15 min -> 429 con Retry-After (aunque la clave sea buena).
+		  Es en memoria (app/core/limites.py): se reinicia con el servidor y cada worker cuenta por separado. Ajustable en .env
 		- GET /me: perfil del medico de la sesion (sin password ni efirma)
 	- pacientes.py (implementado, /api/v1/pacientes, todo con sesion de medico):
 		- POST: crea (CURP unica, formato validado; 409 si existe). GET: lista paginada con ?buscar=&limit=&offset=
@@ -19,12 +21,17 @@ La carpeta api es la capa presentación de nuestro proyecto en el caso del backe
 		- POST registra (la edad se calcula con la fecha de nacimiento; se genera la llave de acceso). GET lista las PROPIAS
 		  con filtros paciente_id, enfermedad_id, desde, hasta. GET /{id} y PATCH /{id} (corregir diagnostico, peso, altura, notas): solo el autor
 		- POST /acceso {llave}: abre en solo lectura la consulta de otro medico con la llave que le da el paciente. 404 si no coincide
+		  La llave tiene 8 caracteres (XXXX-XXXX, sin 0/O/1/I/L). Como es corta, las incorrectas tambien se limitan: 5 por medico
+		  (o 20 por IP) cada 15 min -> 429
 		- no hay DELETE: son parte del expediente
 	- catalogo.py (implementado, /api/v1/catalogo): GET /enfermedades (con su id para enfermedad_id), GET /enfermedades/{id} (con sus sintomas)
 	  y GET /sintomas (?solo_modelo=true: solo los que entiende el modelo). Sus nombres son los que acepta /ml/predecir
 	- consultas.py (nota): operaciones relacionadas con capturar consultas
 	- historial.py: historial de consultas realizadas
-	- dashboard.py: retorno de datos específicos consultados
+	- dashboard.py (implementado, GET /api/v1/dashboard?anio=): estadisticas de las consultas del anio (de todos los medicos, solo conteos)
+		- top_por_mes: las 5 enfermedades mas diagnosticadas de cada mes (siempre los 12 meses)
+		- top_anual: las 5 mas diagnosticadas del anio; total_anual_por_region y casos_mensuales_por_region se calculan solo para ellas
+		- region = ciudad del medico que atendio (unico dato geografico del esquema); se agrupa sin importar mayusculas ni espacios
 	- ml.py (implementado, prefijo /api/v1/ml):
 		- POST /predecir: {sintomas: [...], top_n} -> enfermedades probables con probabilidad. 422 si un
 		  sintoma no esta en el vocabulario del modelo, 503 si el modelo no esta cargado

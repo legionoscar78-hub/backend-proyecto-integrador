@@ -47,3 +47,14 @@ def test_los_nombres_del_catalogo_son_unicos_aun_normalizados(catalogo):
     # Dos nombres que solo difieren en acentos o mayúsculas se confundirían al buscar por nombre
     for nombres in (catalogo.sintomas, catalogo.enfermedades):
         assert len({normalizar_texto(n) for n in nombres}) == len(nombres)
+
+
+def test_todas_las_enfermedades_del_catalogo_estan_en_espanol(catalogo):
+    assert catalogo.sin_traducir == [], f"Sin traducir: {catalogo.sin_traducir[:10]}"
+    assert len(catalogo.enfermedades) == 773
+    assert len(set(catalogo.enfermedades)) == 773
+
+
+def test_los_nombres_de_enfermedades_no_se_quedaron_con_caracteres_rotos(catalogo):
+    rotos = [n for n in catalogo.enfermedades if "�" in n or "Ã" in n]
+    assert not rotos, rotos

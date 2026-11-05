@@ -1,9 +1,11 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
+from app.api import limites_http
 from app.api.deps import get_current_medico, get_db
+from app.core.limites import intentos_llave
 from app.models.consulta import Consulta
 from app.models.medico import Medico
 from app.schemas.comunes import LIMITE_MAXIMO, LIMITE_POR_DEFECTO, Pagina
@@ -48,17 +50,29 @@ def registrar_consulta(
 @router.post(
     "/acceso",
     response_model=ConsultaSalida,
-    responses={404: {"description": "La llave no corresponde a ninguna consulta"}},
+    responses={
+        404: {"description": "La llave no corresponde a ninguna consulta"},
+        429: {"description": "Demasiadas llaves incorrectas: hay que esperar (cabecera Retry-After)"},
+    },
 )
 def consultar_con_llave(
-    datos: AccesoPorLlave, _: Medico = Depends(get_current_medico), db: Session = Depends(get_db)
+    datos: AccesoPorLlave, request: Request,
+    medico: Medico = Depends(get_current_medico), db: Session = Depends(get_db),
 ) -> Consulta:
     """Abre (solo lectura) una consulta de otro médico con la llave que le dio el paciente. La llave va en el cuerpo
-    y no en la URL para que no quede en los registros del servidor. Acepta minúsculas, espacios o sin guiones."""
+    y no en la URL para que no quede en los registros del servidor. Acepta minúsculas, espacios o sin guiones.
+
+    Límite de intentos: la llave es corta (8 caracteres), así que se limitan las incorrectas: 5 por médico
+    (o 20 por IP) cada 15 minutos; después responde 429."""
+    ip, cuenta = limites_http.ip_cliente(request), f"medico:{medico.id}"
+    limites_http.exigir_sin_bloqueo(intentos_llave, ip, cuenta)
     try:
-        return servicio.obtener_por_llave(db, datos.llave)
+        consulta = servicio.obtener_por_llave(db, datos.llave)
     except servicio.LlaveInvalida:
+        limites_http.registrar_fallo(intentos_llave, ip, cuenta)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="La llave no corresponde a ninguna consulta")
+    limites_http.registrar_acierto(intentos_llave, ip, cuenta)
+    return consulta
 
 
 @router.get("", response_model=Pagina[ConsultaSalida])

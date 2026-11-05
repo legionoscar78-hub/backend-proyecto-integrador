@@ -9,7 +9,7 @@ from datos import dias
 
 URL = "/api/v1/consultas"
 ACCESO = f"{URL}/acceso"
-PATRON_LLAVE = re.compile(rf"^[{ALFABETO_LLAVE}]{{4}}(-[{ALFABETO_LLAVE}]{{4}}){{3}}$")
+PATRON_LLAVE = re.compile(rf"^[{ALFABETO_LLAVE}]{{4}}-[{ALFABETO_LLAVE}]{{4}}$")
 
 
 def _edad(nacimiento: date) -> int:
@@ -38,13 +38,13 @@ def test_las_llaves_no_se_repiten():
 
 
 @pytest.mark.parametrize("escrita", [
-    "K7QM-2XW9-HP4T-R8ZD", "k7qm-2xw9-hp4t-r8zd", "K7QM 2XW9 HP4T R8ZD", "k7qm2xw9hp4tr8zd", "  K7QM-2XW9-HP4T-R8ZD\n",
+    "K7QM-2XW9", "k7qm-2xw9", "K7QM 2XW9", "k7qm2xw9", "  K7QM-2XW9\n",
 ])
 def test_normalizar_llave_acepta_las_formas_en_que_se_escribe(escrita):
-    assert normalizar_llave(escrita) == "K7QM-2XW9-HP4T-R8ZD"
+    assert normalizar_llave(escrita) == "K7QM-2XW9"
 
 
-@pytest.mark.parametrize("mala", ["", "abc", "K7QM-2XW9-HP4T", "K7QM-2XW9-HP4T-R8ZD-XXXX"])
+@pytest.mark.parametrize("mala", ["", "abc", "K7QM-2XW9-HP4T"])
 def test_normalizar_llave_deja_pasar_lo_que_no_puede_coincidir(mala):
     assert not PATRON_LLAVE.fullmatch(normalizar_llave(mala))
 
@@ -55,7 +55,7 @@ def test_normalizar_llave_deja_pasar_lo_que_no_puede_coincidir(mala):
     ("post", URL), ("get", URL), ("get", f"{URL}/1"), ("patch", f"{URL}/1"), ("post", ACCESO),
 ])
 def test_todos_los_endpoints_exigen_sesion(api, metodo, ruta):
-    cuerpo = {"json": {"paciente_id": 1, "enfermedad_id": 1, "llave": "K7QM-2XW9-HP4T-R8ZD"}} if metodo in ("post", "patch") else {}
+    cuerpo = {"json": {"paciente_id": 1, "enfermedad_id": 1, "llave": "K7QM-2XW9"}} if metodo in ("post", "patch") else {}
     assert getattr(api.cliente, metodo)(ruta, **cuerpo).status_code == 401
 
 
@@ -121,10 +121,10 @@ def test_faltan_campos_obligatorios(base):
 def test_si_la_llave_choca_se_reintenta_con_otra(base, monkeypatch):
     api, h, paciente, enf = base
     primera = api.consulta(h, paciente["id"], enf)["llave"]
-    secuencia = iter([primera, primera, "AAAA-BBBB-CCCC-DDDD"])  # dos choques y luego una libre
+    secuencia = iter([primera, primera, "AAAA-BBBB"])  # dos choques y luego una libre
     monkeypatch.setattr(consulta_service, "nueva_llave", lambda: next(secuencia))
     r = api.cliente.post(URL, headers=h, json={"paciente_id": paciente["id"], "enfermedad_id": enf})
-    assert r.status_code == 201 and r.json()["llave"] == "AAAA-BBBB-CCCC-DDDD"
+    assert r.status_code == 201 and r.json()["llave"] == "AAAA-BBBB"
 
 
 def test_si_no_se_logra_una_llave_unica_da_503_y_la_sesion_sigue_sirviendo(base, monkeypatch):
@@ -223,7 +223,7 @@ def test_con_la_llave_solo_se_lee_no_se_da_acceso_a_nada_mas(base):
     assert api.cliente.get(f"{URL}/{c['id']}", headers=ana).json()["notas"] is None
 
 
-@pytest.mark.parametrize("llave", ["AAAA-BBBB-CCCC-DDDD", "abc", "K7QM-2XW9-HP4T", "' OR 1=1 --", "%", "_" * 19])
+@pytest.mark.parametrize("llave", ["AAAA-BBBB", "abc", "K7QM-2XW9-HP4T", "' OR 1=1 --", "%", "_" * 9])
 def test_una_llave_incorrecta_da_404_siempre_con_el_mismo_mensaje(base, llave):
     api, ana, paciente, enf = base
     api.consulta(ana, paciente["id"], enf)

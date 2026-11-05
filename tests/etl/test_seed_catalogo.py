@@ -111,3 +111,52 @@ def test_falla_si_una_traduccion_choca_con_el_nombre_ingles_de_otra_enfermedad(a
     lm.to_csv(mappings / "label_map.csv", index=False, encoding="utf-8-sig")
     with pytest.raises(ValueError, match="repetidos"):
         seed.leer_catalogo(csv, mappings)
+
+
+# ---------------------------------------------------------------- traducciones del resto de enfermedades
+
+def _traducciones(mappings, filas):
+    pd.DataFrame(filas, columns=["enfermedad_en", "enfermedad_es"]).to_csv(
+        mappings / "enfermedades_es.csv", index=False, encoding="utf-8-sig")
+
+
+def test_las_enfermedades_fuera_del_modelo_se_traducen_con_enfermedades_es(archivos):
+    csv, mappings = archivos
+    _traducciones(mappings, [["rare thing", "cosa rara"]])
+    cat = seed.leer_catalogo(csv, mappings)
+    assert set(cat.enfermedades) == {"influenza (gripe)", "resfriado común", "cosa rara"}
+    assert cat.sin_traducir == [] and cat.enfermedades_traducidas == 3
+    assert cat.renombres["rare thing"] == "cosa rara"
+    assert ("cosa rara", "dolor de garganta") in cat.pares
+    assert "cosa rara" not in cat.descripciones  # solo las del modelo llevan CIE-10
+
+
+def test_sin_enfermedades_es_las_demas_quedan_en_ingles_y_se_cuentan(archivos):
+    cat = seed.leer_catalogo(*archivos)
+    assert cat.sin_traducir == ["rare thing"] and cat.enfermedades_traducidas == 2
+
+
+def test_la_clave_de_enfermedades_es_se_normaliza_como_el_dataset(archivos):
+    csv, mappings = archivos
+    _traducciones(mappings, [["  Rare   THING ", "cosa rara"]])
+    assert "cosa rara" in seed.leer_catalogo(csv, mappings).enfermedades
+
+
+@pytest.mark.parametrize("filas, error", [
+    ([["rare thing", "a"], ["rare thing", "b"]], "repetidas"),
+    ([["rare thing", "  "]], "vacías"),
+    ([["no existe", "x"]], "no están en el dataset"),
+    ([["flu", "gripe"]], "label_map"),                          # ya la traduce label_map.csv
+    ([["rare thing", "influenza (gripe)"]], "repetidos"),       # choca con otra traducción
+])
+def test_enfermedades_es_incoherente_se_rechaza_antes_de_tocar_la_bd(archivos, filas, error):
+    csv, mappings = archivos
+    _traducciones(mappings, filas)
+    with pytest.raises(ValueError, match=error):
+        seed.leer_catalogo(csv, mappings)
+
+
+def test_los_acentos_y_la_n_sobreviven_a_la_lectura(archivos):
+    csv, mappings = archivos
+    _traducciones(mappings, [["rare thing", "enfermedad rara del niño con dolor de cabeza"]])
+    assert "enfermedad rara del niño con dolor de cabeza" in seed.leer_catalogo(csv, mappings).enfermedades

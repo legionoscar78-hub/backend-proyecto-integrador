@@ -3,8 +3,8 @@
 Llena enfermedades, sintomas y enfermedadesdetalle (tablas de docs/ScriptDb.sql). Los nombres se
 guardan en español usando los catálogos de ml_pipeline/mappings/:
   - sintomas.nombresintoma: nombre en español de los 377 síntomas (sintomas.csv).
-  - enfermedades.nombreenfermedad: nombre en español de las 99 enfermedades del modelo
-    (label_map.csv). Las demás conservan el nombre original en inglés hasta que se traduzcan.
+  - enfermedades.nombreenfermedad: nombre en español de las 773 enfermedades: las 99 del modelo
+    (label_map.csv) y las otras 674 (enfermedades_es.csv).
   - enfermedades.descripcion: para las 99 del modelo, el código y la descripción CIE-10.
 Es idempotente: se puede ejecutar varias veces sin duplicar filas.
 
@@ -50,10 +50,12 @@ class Catalogo:
     pares: list[tuple[str, str]]            # (enfermedad, síntoma), con los nombres de la BD
     sintomas_sin_enfermedad: list[str]
     descripciones: dict[str, str]           # enfermedad -> "CIE-10 J01: ..." (solo las del modelo)
+    renombres: dict[str, str]               # nombre en inglés -> nombre en español (para bases ya cargadas)
+    sin_traducir: list[str]                 # enfermedades que se quedaron en inglés
 
     @property
     def enfermedades_traducidas(self) -> int:
-        return len(self.descripciones)
+        return len(self.enfermedades) - len(self.sin_traducir)
 
 
 def leer_catalogo(csv: Path, mappings: Path = MAPPINGS) -> Catalogo:
@@ -87,14 +89,21 @@ def leer_catalogo(csv: Path, mappings: Path = MAPPINGS) -> Catalogo:
     sintomas = [sintoma_es[s] for s in sintomas_en]
     _validar_nombres(sintomas, "síntomas")
 
-    # --- enfermedades: español si está en label_map.csv, si no el nombre original
+    # --- enfermedades: español si está en label_map.csv (las del modelo) o en
+    # enfermedades_es.csv (el resto); si falta en ambos, se conserva el nombre original
     lm = pd.read_csv(mappings / "label_map.csv", encoding="utf-8-sig")
     del_modelo = {normalizar_texto(r.enfermedad_en): r for r in lm.itertuples()}
     desconocidas = set(del_modelo) - set(presencia.index)
     if desconocidas:
         raise ValueError(f"label_map.csv tiene enfermedades que no están en el dataset: {sorted(desconocidas)}")
 
-    nombre_bd = {en: (del_modelo[en].enfermedad_es if en in del_modelo else en) for en in presencia.index}
+    otras = _leer_traducciones(mappings / "enfermedades_es.csv", set(presencia.index), set(del_modelo))
+
+    nombre_bd = {
+        en: (del_modelo[en].enfermedad_es if en in del_modelo else otras.get(en, en))
+        for en in presencia.index
+    }
+    renombres = {en: es for en, es in nombre_bd.items() if es != en}
     enfermedades = [nombre_bd[en] for en in presencia.index]
     _validar_nombres(enfermedades, "enfermedades")
     descripciones = {
@@ -112,7 +121,29 @@ def leer_catalogo(csv: Path, mappings: Path = MAPPINGS) -> Catalogo:
         pares=pares,
         sintomas_sin_enfermedad=[sintoma_es[s] for s in presencia.columns[~presencia.any()]],
         descripciones=descripciones,
+        renombres=renombres,
+        sin_traducir=[en for en in presencia.index if en not in del_modelo and en not in otras],
     )
+
+
+def _leer_traducciones(ruta: Path, enfermedades: set[str], del_modelo: set[str]) -> dict[str, str]:
+    """Lee enfermedades_es.csv (nombre_en -> nombre_es) y comprueba que sea coherente.
+    Es opcional: si el archivo no existe, esas enfermedades quedan en inglés."""
+    if not ruta.exists():
+        return {}
+    tr = pd.read_csv(ruta, encoding="utf-8-sig", dtype=str, keep_default_na=False)
+    claves = tr["enfermedad_en"].map(normalizar_texto)
+    if claves.duplicated().any():
+        raise ValueError(f"{ruta.name} tiene enfermedades repetidas")
+    if (tr["enfermedad_es"].str.strip() == "").any():
+        raise ValueError(f"{ruta.name} tiene traducciones vacías")
+    extra = set(claves) - enfermedades
+    if extra:
+        raise ValueError(f"{ruta.name} tiene enfermedades que no están en el dataset: {sorted(extra)[:5]}")
+    solapadas = set(claves) & del_modelo
+    if solapadas:
+        raise ValueError(f"{ruta.name} repite enfermedades de label_map.csv: {sorted(solapadas)[:5]}")
+    return dict(zip(claves, tr["enfermedad_es"].str.strip()))
 
 
 def _validar_nombres(nombres: list[str], que: str) -> None:
@@ -160,6 +191,13 @@ def cargar(conn: Connection, cat: Catalogo) -> dict[str, tuple[int, int]]:
     _verificar_tablas(conn)
     antes = _contar(conn)
 
+    # Si el catálogo ya se había cargado con nombres en inglés, se renombran las filas
+    # (conservan su id, así las consultas que las usan no se pierden) en vez de duplicarlas.
+    conn.execute(
+        text("update enfermedades set nombreenfermedad = :es where nombreenfermedad = :en "
+             "and not exists (select 1 from enfermedades where nombreenfermedad = :es)"),
+        [{"en": en, "es": es} for en, es in cat.renombres.items()],
+    )
     conn.execute(
         text("insert into enfermedades (nombreenfermedad) values (:n) on conflict (nombreenfermedad) do nothing"),
         [{"n": e} for e in cat.enfermedades],
@@ -199,7 +237,7 @@ def main() -> None:
     cat = leer_catalogo(args.csv)
     print(f"CSV: {args.csv.name}")
     print(f"  enfermedades:                 {len(cat.enfermedades)} "
-          f"({cat.enfermedades_traducidas} en español, el resto en inglés)")
+          f"({cat.enfermedades_traducidas} en español, {len(cat.sin_traducir)} en inglés)")
     print(f"  síntomas:                     {len(cat.sintomas)} (todos en español)")
     print(f"  relaciones enfermedad-síntoma: {len(cat.pares)}")
     if cat.sintomas_sin_enfermedad:

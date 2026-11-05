@@ -1,6 +1,7 @@
 """App completa sobre SQLite en memoria (todas las tablas, con claves foráneas activas) y ayudantes
 para crear médicos con sesión. Así las pruebas recorren el mismo camino que una petición real."""
 import os
+from datetime import datetime
 
 import pytest
 from fastapi import FastAPI
@@ -13,7 +14,7 @@ import app.models  # noqa: F401  registra todas las tablas
 from app.api.deps import get_db
 from app.api.v1.api import api_router
 from app.core.database import Base
-from app.models import Enfermedad, EnfermedadDetalle, Sintoma
+from app.models import Consulta, Enfermedad, EnfermedadDetalle, Sintoma
 from datos import dias, paciente_json
 
 
@@ -21,9 +22,9 @@ class Api:
     def __init__(self, cliente: TestClient, sesion):
         self.cliente, self.Sesion = cliente, sesion
 
-    def medico(self, usuario: str = "dra.ana") -> dict:
+    def medico(self, usuario: str = "dra.ana", ciudad: str = "Morelia") -> dict:
         """Registra al médico (si no existe), inicia sesión y devuelve la cabecera Authorization."""
-        datos = {"nombre": "Ana", "apellidos": "López", "ciudad": "Morelia", "efirma": "firma",
+        datos = {"nombre": "Ana", "apellidos": "López", "ciudad": ciudad, "efirma": "firma",
                  "nombre_de_usuario": usuario, "password": "Clave-segura-123"}
         self.cliente.post("/api/v1/auth/registro", json=datos)
         r = self.cliente.post("/api/v1/auth/login", json={"nombre_de_usuario": usuario, "password": datos["password"]})
@@ -59,6 +60,12 @@ class Api:
                               json={"paciente_id": paciente_id, "enfermedad_id": enfermedad_id, **extra})
         assert r.status_code == 201, r.text
         return r.json()
+
+    def fechar(self, consulta_id: int, cuando: datetime) -> None:
+        """Cambia la fecha de una consulta (la API siempre pone la de ahora)."""
+        with self.Sesion() as db:
+            db.get(Consulta, consulta_id).fecha_consulta = cuando
+            db.commit()
 
     def cita(self, headers: dict, paciente_id: int, fecha: str | None = None, hora: str = "10:00") -> dict:
         r = self.cliente.post("/api/v1/citas", headers=headers,

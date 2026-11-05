@@ -14,3 +14,17 @@ os.environ.pop("ACCESS_TOKEN_MINUTES", None)
 for variable in ("DB_NAME", "DB_USER", "DB_PASSWORD"):
     if variable not in os.environ and f"{variable.lower()}=" not in _definidas_en_env:
         os.environ[variable] = "prueba"
+
+
+import pytest  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _contadores_de_intentos_en_cero():
+    """El límite de intentos vive en memoria y es global: sin esto, los fallos de una prueba
+    contarían en la siguiente."""
+    from app.core.limites import intentos_llave, intentos_login
+
+    intentos_login.limpiar()
+    intentos_llave.limpiar()
+    yield

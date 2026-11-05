@@ -20,8 +20,14 @@ class Settings(BaseSettings):
     jwt_secret: str = Field(min_length=32)
     access_token_minutes: int = Field(default=60, ge=1, le=1440)
 
-    model_config = SettingsConfigDict(env_file=ENV_FILE)
+    # Límite de intentos fallidos (login y acceso con llave). Una misma cuenta o médico puede fallar
+    # `intentos_max_por_cuenta` veces dentro de la ventana; una misma IP, `intentos_max_por_ip` (más
+    # alto, porque detrás de una IP puede haber una clínica entera). Después responde 429.
+    intentos_max_por_cuenta: int = Field(default=5, ge=1, le=100)
+    intentos_max_por_ip: int = Field(default=20, ge=1, le=1000)
+    intentos_ventana_minutos: int = Field(default=15, ge=1, le=1440)
 
+    model_config = SettingsConfigDict(env_file=ENV_FILE)
     @property
     def database_url(self) -> URL:
         return URL.create(

@@ -19,9 +19,11 @@ from app.services.paciente_service import PacienteNoEncontrado
 
 INTENTOS_DE_LLAVE = 3
 # Alfabeto de 31 caracteres sin los que se confunden al dictarlos o copiarlos (0/O, 1/I/L).
-# 16 caracteres = unos 79 bits al azar: no se puede adivinar probando.
+# 8 caracteres = 31^8, unos 850 mil millones de llaves: no se adivina a mano, pero a máquina sí si
+# nada la frenara; por eso POST /consultas/acceso limita los intentos fallidos.
 ALFABETO_LLAVE = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
-LARGO_LLAVE = 16
+LARGO_LLAVE = 8
+GRUPO_LLAVE = 4
 
 
 class ConsultaNoEncontrada(Exception):
@@ -41,9 +43,12 @@ class NoSePudoGenerarLlave(Exception):
 
 
 def nueva_llave() -> str:
-    """Llave de acceso al azar, en grupos de 4 para dictarla: XXXX-XXXX-XXXX-XXXX."""
-    caracteres = "".join(secrets.choice(ALFABETO_LLAVE) for _ in range(LARGO_LLAVE))
-    return "-".join(caracteres[i:i + 4] for i in range(0, LARGO_LLAVE, 4))
+    """Llave de acceso al azar, en grupos de 4 para dictarla: XXXX-XXXX."""
+    return _con_guiones("".join(secrets.choice(ALFABETO_LLAVE) for _ in range(LARGO_LLAVE)))
+
+
+def _con_guiones(caracteres: str) -> str:
+    return "-".join(caracteres[i:i + GRUPO_LLAVE] for i in range(0, len(caracteres), GRUPO_LLAVE))
 
 
 def normalizar_llave(texto: str) -> str:
@@ -51,7 +56,7 @@ def normalizar_llave(texto: str) -> str:
     limpia = re.sub(r"[^A-Za-z0-9]", "", texto).upper()
     if len(limpia) != LARGO_LLAVE:
         return limpia  # no puede coincidir con ninguna; se busca tal cual y no aparece
-    return "-".join(limpia[i:i + 4] for i in range(0, LARGO_LLAVE, 4))
+    return _con_guiones(limpia)
 
 
 def _exigir_enfermedad(db: Session, enfermedad_id: int) -> None:

@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.api import limites_http
 from app.api.deps import get_current_medico, get_db
+from app.core.limites import intentos_login
 from app.models.medico import Medico
 from app.schemas.auth import LoginEntrada, MedicoSalida, RegistroEntrada, TokenSalida
 from app.services import auth_service
@@ -26,18 +28,30 @@ def registro(datos: RegistroEntrada, db: Session = Depends(get_db)) -> Medico:
 @router.post(
     "/login",
     response_model=TokenSalida,
-    responses={401: {"description": "Usuario o contraseña incorrectos"}},
+    responses={
+        401: {"description": "Usuario o contraseña incorrectos"},
+        429: {"description": "Demasiados intentos fallidos: hay que esperar (cabecera Retry-After)"},
+    },
 )
-def login(datos: LoginEntrada, db: Session = Depends(get_db)) -> TokenSalida:
-    """Devuelve un token para enviar como `Authorization: Bearer <token>`."""
+def login(datos: LoginEntrada, request: Request, db: Session = Depends(get_db)) -> TokenSalida:
+    """Devuelve un token para enviar como `Authorization: Bearer <token>`.
+
+    Límite de intentos: tras 5 fallos con el mismo usuario desde la misma IP (o 20 desde una misma IP
+    con cualquier usuario) responde 429 durante 15 minutos, aunque la contraseña ya sea la correcta.
+    Un inicio de sesión correcto reinicia el contador de ese usuario."""
+    ip = limites_http.ip_cliente(request)
+    cuenta = f"{ip}|{datos.nombre_de_usuario.lower()}"
+    limites_http.exigir_sin_bloqueo(intentos_login, ip, cuenta)
     try:
         token, segundos = auth_service.iniciar_sesion(db, datos)
     except auth_service.CredencialesInvalidas:
+        limites_http.registrar_fallo(intentos_login, ip, cuenta)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario o contraseña incorrectos",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    limites_http.registrar_acierto(intentos_login, ip, cuenta)
     return TokenSalida(access_token=token, expires_in=segundos)
 
 

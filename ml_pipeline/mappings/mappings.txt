@@ -8,6 +8,10 @@ una traduccion o un codigo, se edita aqui (el notebook 02_eda_sintomas los valid
 	- enfermedad_es, cie10_codigo (3 caracteres), cie10_descripcion (texto de ICD-10.csv)
 	- tipo_mapeo: exacto = el codigo coincide con la enfermedad; amplio = categoria mas general
 	- sistema, casos_originales, casos_unicos, sintomas_posibles: informativos
+- enfermedades_es.csv: nombre en espanol de las 674 enfermedades del dataset que NO estan en label_map.csv
+	- enfermedad_en (misma clave normalizada que el dataset) y enfermedad_es; scripts/seed_catalogo.py las carga como
+	  nombreenfermedad y valida que no haya repetidas, vacias ni que choquen con las de label_map.csv
+	- no sirve para entrenar: el modelo solo usa las de label_map.csv
 - sintomas.csv: vocabulario de sintomas, en el orden de columnas del dataset
 	- nombre_en: clave estable (igual a sintomas.nombresintoma en la BD); nombre_es: para mostrar
 	- usado_en_modelo = 1: los sintomas que formaran symptoms.json (orden = columna "orden")
