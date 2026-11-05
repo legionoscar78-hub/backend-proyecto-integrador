@@ -27,7 +27,9 @@ La carpeta api es la capa presentación de nuestro proyecto en el caso del backe
 	- catalogo.py (implementado, /api/v1/catalogo): GET /enfermedades (con su id para enfermedad_id), GET /enfermedades/{id} (con sus sintomas)
 	  y GET /sintomas (?solo_modelo=true: solo los que entiende el modelo). Sus nombres son los que acepta /ml/predecir
 	- consultas.py (nota): operaciones relacionadas con capturar consultas
-	- historial.py: historial de consultas realizadas
+	- historial.py (implementado, GET /api/v1/historial/{paciente_id}?desde=&hasta=&limit=&offset=): el paciente y SUS consultas
+	  (las que hizo el medico de la sesion). Cualquier medico puede abrir a cualquier paciente, pero las consultas de otros medicos
+	  no se listan ni se cuentan: se abren con la llave en POST /consultas/acceso
 	- dashboard.py (implementado, GET /api/v1/dashboard?anio=): estadisticas de las consultas del anio (de todos los medicos, solo conteos)
 		- top_por_mes: las 5 enfermedades mas diagnosticadas de cada mes (siempre los 12 meses)
 		- top_anual: las 5 mas diagnosticadas del anio; total_anual_por_region y casos_mensuales_por_region se calculan solo para ellas
