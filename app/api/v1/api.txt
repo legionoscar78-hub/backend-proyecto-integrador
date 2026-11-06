@@ -10,6 +10,11 @@ La carpeta api es la capa presentación de nuestro proyecto en el caso del backe
 		  Limite de intentos: 5 fallos por usuario+IP (o 20 por IP) cada 15 min -> 429 con Retry-After (aunque la clave sea buena).
 		  Es en memoria (app/core/limites.py): se reinicia con el servidor y cada worker cuenta por separado. Ajustable en .env
 		- GET /me: perfil del medico de la sesion (sin password ni efirma)
+		- PATCH /me: el medico de la sesion actualiza SU perfil (parcial: nombre, apellidos, ciudad, efirma, nombre_de_usuario).
+		  El id sale del token: no hay forma de editar a otro medico. Ningun campo admite null. 409 si el usuario ya existe
+		  El token sigue valiendo al cambiar el usuario (identifica por id)
+		- PUT /me/password: {password_actual, password_nueva} -> 204. 400 (no 401) si la actual no coincide; esos fallos cuentan
+		  contra el mismo limite del login (5 -> 429). Los tokens ya emitidos siguen validos hasta que expiren (son sin estado)
 	- pacientes.py (implementado, /api/v1/pacientes, todo con sesion de medico):
 		- POST: crea (CURP unica, formato validado; 409 si existe). GET: lista paginada con ?buscar=&limit=&offset=
 		- GET /{id}, PATCH /{id} (parcial; null borra telefono, tipo de sangre y notas), DELETE /{id} (409 si tiene citas o consultas)

@@ -1,4 +1,4 @@
-"""Reglas de negocio de la sesión: registrar médicos e iniciar sesión.
+"""Reglas de negocio de la sesión: registrar médicos, iniciar sesión y actualizar el propio perfil.
 No conoce HTTP: los errores del dominio llegan al router, que los traduce a códigos de estado."""
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core import security
 from app.models.medico import Medico
 from app.repositories import medico_repo
-from app.schemas.auth import LoginEntrada, RegistroEntrada
+from app.schemas.auth import CambioPassword, LoginEntrada, MedicoActualizar, RegistroEntrada
 
 
 class UsuarioYaExiste(Exception):
@@ -50,3 +50,29 @@ def iniciar_sesion(db: Session, datos: LoginEntrada) -> tuple[str, int]:
         medico.password = security.hashear_password(datos.password)
         db.commit()
     return security.crear_token(medico.id)
+
+
+def actualizar_perfil(db: Session, medico: Medico, datos: MedicoActualizar) -> Medico:
+    """Actualiza los datos del médico de la sesión (el router solo le pasa a quien tiene sesión)."""
+    cambios = datos.model_dump(exclude_unset=True)
+
+    nuevo_usuario = cambios.get("nombre_de_usuario")
+    if nuevo_usuario and nuevo_usuario != medico.nombre_de_usuario and medico_repo.obtener_por_usuario(db, nuevo_usuario):
+        raise UsuarioYaExiste(nuevo_usuario)
+
+    for campo, valor in cambios.items():
+        setattr(medico, campo, valor)
+    try:
+        db.commit()
+    except IntegrityError:  # dos cambios simultáneos al mismo nombre: decide la restricción UNIQUE
+        db.rollback()
+        raise UsuarioYaExiste(nuevo_usuario)
+    return medico
+
+
+def cambiar_password(db: Session, medico: Medico, datos: CambioPassword) -> None:
+    """Exige la contraseña actual: una sesión abierta o robada no basta para adueñarse de la cuenta."""
+    if not security.verificar_password(datos.password_actual, medico.password):
+        raise CredencialesInvalidas()
+    medico.password = security.hashear_password(datos.password_nueva)
+    db.commit()

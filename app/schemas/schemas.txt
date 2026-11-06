@@ -2,7 +2,7 @@ FUNCIONES Y METODOS: SCHEMAS
 
 Contratos de entrada y salida, consulta informacion de la base de datos y relaciona el historial de consultas con el mismo paciente
 
-- auth.py: RegistroEntrada, LoginEntrada, TokenSalida y MedicoSalida (nunca incluye password ni efirma)
+- auth.py: RegistroEntrada, MedicoActualizar (parcial, sin nulos), CambioPassword, LoginEntrada, TokenSalida y MedicoSalida (nunca incluye password ni efirma)
 - paciente.py: PacienteCrear, PacienteActualizar (parcial), PacienteSalida (con edad calculada) y PacienteResumen
 - consulta.py: ConsultaCrear, ConsultaActualizar, AccesoPorLlave y ConsultaSalida
 - catalogo.py: EnfermedadSalida, EnfermedadDetalleSalida y SintomaSalida

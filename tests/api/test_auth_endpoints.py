@@ -217,3 +217,140 @@ def test_cada_token_identifica_a_su_medico(cliente):
     t_ana, t_luis = _token(cliente), _token(cliente, usuario="dr.luis")
     assert cliente.get(ME, headers=_auth(t_ana)).json()["nombre"] == "Ana"
     assert cliente.get(ME, headers=_auth(t_luis)).json()["nombre"] == "Luis"
+
+
+# ---------------------------------------------------------------- actualizar el propio perfil (PATCH /auth/me)
+
+def _sesion(cliente, usuario="dra.ana", **cambios):
+    _registrar(cliente, nombre_de_usuario=usuario, **cambios)
+    return _auth(_token(cliente, usuario))
+
+
+def test_actualizar_perfil_cambia_solo_lo_enviado(entorno):
+    cliente, Sesion = entorno
+    h = _sesion(cliente)
+    r = cliente.patch(ME, json={"ciudad": "Puebla", "apellidos": "  Pérez  "}, headers=h)
+    assert r.status_code == 200
+    assert r.json() == {"id": 1, "nombre": "Ana", "apellidos": "Pérez", "ciudad": "Puebla",
+                        "nombre_de_usuario": "dra.ana"}
+    assert cliente.get(ME, headers=h).json()["ciudad"] == "Puebla"
+    with Sesion() as db:
+        assert db.scalar(select(Medico)).efirma == "firma-demo-abc123"  # lo no enviado no se toca
+
+
+def test_actualizar_efirma_no_se_devuelve_pero_se_guarda(entorno):
+    cliente, Sesion = entorno
+    h = _sesion(cliente)
+    r = cliente.patch(ME, json={"efirma": "firma-nueva"}, headers=h)
+    assert r.status_code == 200 and "efirma" not in r.json()
+    with Sesion() as db:
+        assert db.scalar(select(Medico)).efirma == "firma-nueva"
+
+
+def test_cambiar_el_nombre_de_usuario_mantiene_la_sesion_y_el_login_nuevo(cliente):
+    h = _sesion(cliente)
+    r = cliente.patch(ME, json={"nombre_de_usuario": "Doctora.Ana"}, headers=h)
+    assert r.status_code == 200 and r.json()["nombre_de_usuario"] == "doctora.ana"  # en minúsculas
+    assert cliente.get(ME, headers=h).status_code == 200  # el token identifica por id
+    assert cliente.post(LOGIN, json={"nombre_de_usuario": "dra.ana", "password": MEDICO["password"]}).status_code == 401
+    assert _token(cliente, "doctora.ana")
+
+
+def test_nombre_de_usuario_ocupado_da_409_y_no_cambia_nada(cliente):
+    _registrar(cliente, nombre_de_usuario="luis")
+    h = _sesion(cliente)
+    r = cliente.patch(ME, json={"nombre": "Otra", "nombre_de_usuario": "LUIS"}, headers=h)
+    assert r.status_code == 409
+    perfil = cliente.get(ME, headers=h).json()
+    assert perfil["nombre"] == "Ana" and perfil["nombre_de_usuario"] == "dra.ana"
+
+
+def test_conservar_el_mismo_nombre_de_usuario_no_es_conflicto(cliente):
+    h = _sesion(cliente)
+    assert cliente.patch(ME, json={"nombre_de_usuario": "Dra.Ana", "ciudad": "León"}, headers=h).status_code == 200
+
+
+def test_actualizar_perfil_exige_sesion(cliente):
+    _sesion(cliente)
+    assert cliente.patch(ME, json={"ciudad": "Puebla"}).status_code == 401
+    assert cliente.patch(ME, json={"ciudad": "Puebla"}, headers=_auth("token-falso")).status_code == 401
+
+
+def test_un_medico_solo_edita_su_propio_perfil(cliente):
+    h_ana = _sesion(cliente)
+    h_luis = _sesion(cliente, "luis", nombre="Luis")
+    cliente.patch(ME, json={"ciudad": "Puebla"}, headers=h_luis)
+    assert cliente.get(ME, headers=h_ana).json()["ciudad"] == "Morelia"  # Ana no cambió
+    assert cliente.get(ME, headers=h_luis).json()["ciudad"] == "Puebla"
+
+
+def test_el_id_no_se_puede_enviar_para_editar_a_otro(cliente):
+    _registrar(cliente, nombre_de_usuario="luis")
+    h = _sesion(cliente)
+    r = cliente.patch(ME, json={"id": 1, "ciudad": "Puebla"}, headers=h)  # campo desconocido: se ignora
+    assert r.status_code == 200 and r.json()["id"] == 2
+    assert cliente.get(ME, headers=_auth(_token(cliente, "luis"))).json()["ciudad"] == "Morelia"
+
+
+@pytest.mark.parametrize("cuerpo", [
+    {}, {"nombre": None}, {"ciudad": ""}, {"nombre": "   "}, {"nombre_de_usuario": "ab"},
+    {"nombre_de_usuario": "con espacio"}, {"apellidos": "x" * 151}, {"efirma": None},
+])
+def test_actualizar_perfil_rechaza_datos_invalidos(cliente, cuerpo):
+    h = _sesion(cliente)
+    assert cliente.patch(ME, json=cuerpo, headers=h).status_code == 422
+
+
+# ---------------------------------------------------------------- cambiar la contraseña (PUT /auth/me/password)
+
+PASSWORD = f"{ME}/password"
+NUEVA = "Otra-clave-456"
+
+
+def test_cambiar_password_con_la_actual(entorno):
+    cliente, Sesion = entorno
+    h = _sesion(cliente)
+    r = cliente.put(PASSWORD, json={"password_actual": MEDICO["password"], "password_nueva": NUEVA}, headers=h)
+    assert r.status_code == 204 and r.content == b""
+    assert cliente.post(LOGIN, json={"nombre_de_usuario": "dra.ana", "password": MEDICO["password"]}).status_code == 401
+    assert _token(cliente, "dra.ana", NUEVA)
+    with Sesion() as db:
+        guardado = db.scalar(select(Medico)).password
+        assert guardado.startswith("$argon2id$") and NUEVA not in guardado
+
+
+def test_password_actual_incorrecta_da_400_y_no_cambia_nada(cliente):
+    h = _sesion(cliente)
+    r = cliente.put(PASSWORD, json={"password_actual": "no-es-esta-123", "password_nueva": NUEVA}, headers=h)
+    assert r.status_code == 400  # no 401: el frontend lo tomaría por sesión vencida
+    assert cliente.get(ME, headers=h).status_code == 200
+    assert _token(cliente, "dra.ana", MEDICO["password"])
+
+
+def test_cambiar_password_exige_sesion(cliente):
+    _sesion(cliente)
+    r = cliente.put(PASSWORD, json={"password_actual": MEDICO["password"], "password_nueva": NUEVA})
+    assert r.status_code == 401
+
+
+@pytest.mark.parametrize("cuerpo", [
+    {"password_actual": MEDICO["password"], "password_nueva": "corta"},
+    {"password_actual": MEDICO["password"], "password_nueva": MEDICO["password"]},
+    {"password_actual": "", "password_nueva": NUEVA},
+    {"password_nueva": NUEVA},
+])
+def test_cambiar_password_rechaza_datos_invalidos(cliente, cuerpo):
+    h = _sesion(cliente)
+    assert cliente.put(PASSWORD, json=cuerpo, headers=h).status_code == 422
+
+
+def test_adivinar_la_password_actual_se_limita_con_429(cliente):
+    h = _sesion(cliente)
+    malo = {"password_actual": "no-es-esta-123", "password_nueva": NUEVA}
+    for _ in range(settings.intentos_max_por_cuenta):
+        assert cliente.put(PASSWORD, json=malo, headers=h).status_code == 400
+    r = cliente.put(PASSWORD, json=malo, headers=h)
+    assert r.status_code == 429 and int(r.headers["Retry-After"]) > 0
+    # bloqueado también con la contraseña correcta, igual que el login
+    bueno = {"password_actual": MEDICO["password"], "password_nueva": NUEVA}
+    assert cliente.put(PASSWORD, json=bueno, headers=h).status_code == 429
