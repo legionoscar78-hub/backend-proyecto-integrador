@@ -10,7 +10,7 @@ from app.models.consulta import Consulta
 
 def obtener(db: Session, consulta_id: int, medico_id: int) -> Consulta | None:
     return db.scalar(
-        select(Consulta).options(joinedload(Consulta.paciente), joinedload(Consulta.enfermedad))
+        select(Consulta).options(joinedload(Consulta.paciente), joinedload(Consulta.enfermedad), joinedload(Consulta.medico))
         .where(Consulta.id == consulta_id, Consulta.medico_id == medico_id)
     )
 
@@ -18,7 +18,7 @@ def obtener(db: Session, consulta_id: int, medico_id: int) -> Consulta | None:
 def obtener_por_llave(db: Session, llave: str) -> Consulta | None:
     """La consulta con esa llave, de cualquier médico (la llave es lo que autoriza el acceso)."""
     return db.scalar(
-        select(Consulta).options(joinedload(Consulta.paciente), joinedload(Consulta.enfermedad))
+        select(Consulta).options(joinedload(Consulta.paciente), joinedload(Consulta.enfermedad), joinedload(Consulta.medico))
         .where(Consulta.llave == llave)
     )
 
@@ -41,7 +41,7 @@ def listar(
 
     total = db.scalar(select(func.count()).select_from(Consulta).where(*filtros))
     items = db.scalars(
-        select(Consulta).options(joinedload(Consulta.paciente), joinedload(Consulta.enfermedad))
+        select(Consulta).options(joinedload(Consulta.paciente), joinedload(Consulta.enfermedad), joinedload(Consulta.medico))
         .where(*filtros)
         .order_by(Consulta.fecha_consulta.desc(), Consulta.id.desc())
         .limit(limit).offset(offset)

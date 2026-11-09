@@ -52,12 +52,23 @@ class EnfermedadResumen(BaseModel):
     nombre: str
 
 
+class MedicoResumen(BaseModel):
+    """Quién atendió la consulta. Solo nombre y apellidos: ni usuario, ni ciudad, ni firma."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    nombre: str
+    apellidos: str
+
+
 class ConsultaSalida(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     llave: str = Field(description="Llave de acceso: el paciente se la da a otro médico para que pueda ver esta consulta")
     medico_id: int
+    medico: MedicoResumen = Field(description="Médico que realizó la consulta (también al abrirla con la llave)")
     paciente: PacienteResumen
     enfermedad: EnfermedadResumen
     fecha_consulta: datetime

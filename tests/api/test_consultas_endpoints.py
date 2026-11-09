@@ -285,3 +285,33 @@ def test_un_paciente_con_consultas_no_se_puede_borrar(base):
     api, h, paciente, enf = base
     api.consulta(h, paciente["id"], enf)
     assert api.cliente.delete(f"/api/v1/pacientes/{paciente['id']}", headers=h).status_code == 409
+
+
+# ---------------------------------------------------------------- quién atendió la consulta
+
+def test_la_consulta_trae_el_nombre_de_quien_la_atendio_sin_datos_privados(base):
+    api, ana, paciente, enf = base
+    c = api.consulta(ana, paciente["id"], enf)
+    assert c["medico"] == {"id": c["medico_id"], "nombre": "Ana", "apellidos": "López"}  # sin usuario, ciudad ni firma
+
+
+def test_con_la_llave_se_ve_el_nombre_del_medico_que_atendio_no_el_de_quien_la_abre(base):
+    api, ana, paciente, enf = base
+    luis = api.medico("dr.luis")  # el ayudante registra a "Ana López" también: se distingue por id
+    c = api.consulta(ana, paciente["id"], enf)
+
+    abierta = api.cliente.post(ACCESO, headers=luis, json={"llave": c["llave"]}).json()
+    assert abierta["medico"] == c["medico"]
+    assert abierta["medico"]["id"] == ana_id(api, ana)
+
+
+def ana_id(api, ana):
+    return api.cliente.get("/api/v1/auth/me", headers=ana).json()["id"]
+
+
+def test_el_nombre_del_medico_aparece_en_la_lista_y_en_el_historial(base):
+    api, ana, paciente, enf = base
+    api.consulta(ana, paciente["id"], enf)
+    en_lista = api.cliente.get(URL, headers=ana).json()["items"][0]
+    en_historial = api.cliente.get(f"/api/v1/historial/{paciente['id']}", headers=ana).json()["consultas"]["items"][0]
+    assert en_lista["medico"]["nombre"] == en_historial["medico"]["nombre"] == "Ana"
